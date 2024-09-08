@@ -8,6 +8,10 @@ This repo uses `justfile` [(manual)](https://just.systems/man/en/) for developer
 
 If you don't want to install `just` command refer to this document's "Avoid justfile" section.
 
+Easiest ways to install justfiles seem to be using `cargo` or `brew` since there aren't many repositories that have it yet.
+
+When cloning this repo, feel free to replace the Justfile by your preferred way of running scripts.
+
 ## Dev setup
 
 ```
