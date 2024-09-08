@@ -1,0 +1,28 @@
+{
+  "name": "@ruzito/oas-ls-backend-vanilla",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/npm/cli.git"
+  },
+  "scripts": {
+    "test": "node --test ./build/tests/*.js",
+    "build": "tsc -p ."
+  },
+  "keywords": [],
+  "author": "ruzito",
+  "license": "MIT",
+  "description": "",
+  "type": "module",
+  "devDependencies": {
+    "assemblyscript": "^0.27.29",
+    "typescript": "^5.5.4"
+  },
+  "exports": {
+    ".": {
+      "import": "./build/src/index.js",
+      "types": "./build/src/index.d.ts"
+    }
+  }
+}

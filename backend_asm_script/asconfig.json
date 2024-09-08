@@ -1,0 +1,34 @@
+{
+  "targets": {
+    "release": {
+      "outFile": "build/asm.wasm",
+      "textFile": "build/asm.wat",
+      "sourceMap": true,
+      "optimizeLevel": 3,
+      "shrinkLevel": 3,
+      "converge": false,
+      "noAssert": false
+    },
+    "debug": {
+      "outFile": "build/asm_dbg.wasm",
+      "textFile": "build/asm_dbg.wat",
+      "sourceMap": true,
+      "optimizeLevel": 0,
+      "shrinkLevel": 0,
+      "converge": false,
+      "noAssert": false
+    },
+    "bind_test": {
+      "outFile": "build/bind_test.wasm",
+      "textFile": "build/bind_test.wat",
+      "sourceMap": true,
+      "optimizeLevel": 0,
+      "shrinkLevel": 0,
+      "converge": false,
+      "noAssert": false
+    }
+  },
+  "options": {
+    "bindings": "esm"
+  }
+}
