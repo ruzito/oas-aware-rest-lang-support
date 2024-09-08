@@ -8,6 +8,17 @@ This repo uses `justfile` [(manual)](https://just.systems/man/en/) for developer
 
 If you don't want to install `just` command refer to this document's "Avoid justfile" section.
 
+## Dev setup
+
+```
+git clone ... <dir>
+cd <dir>
+just install
+just link
+just build
+just test
+```
+
 ## Avoid justfile
 
 Justfile is similar to GNU Makefile, but more suitable as general purpose command runner
