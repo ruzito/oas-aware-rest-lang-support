@@ -1,0 +1,5 @@
+#!/bin/bash
+set -euxo pipefail
+
+cd backend_vanilla
+npm run test

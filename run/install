@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euxo pipefail
+
+(cd backend_asm_script && npm ci)
+(cd backend_vanilla && npm ci)
+(cd benchmarks && npm ci)
+(cd integration_tests && npm ci)

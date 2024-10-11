@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euxo pipefail
+
+# uplink vanilla
+(cd backend_vanilla && npm link)
+
+# uplink asm_script
+(cd backend_asm_script && npm link)
+
+# downlink tests
+(cd integration_tests && npm link @ruzito/oas-ls-backend-vanilla)
+(cd integration_tests && npm link @ruzito/oas-ls-backend-asm-script)
+
+# downlink benchmarks
+(cd benchmarks && npm link @ruzito/oas-ls-backend-vanilla)
+(cd benchmarks && npm link @ruzito/oas-ls-backend-asm-script)

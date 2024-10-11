@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euxo pipefail
+
+# unlink tests
+(cd integration_tests && npm unlink --no-save @ruzito/oas-ls-backend-vanilla)
+(cd integration_tests && npm unlink --no-save @ruzito/oas-ls-backend-asm-script)
+
+# unlink benchmarks
+(cd benchmarks && npm unlink @ruzito/oas-ls-backend-vanilla)
+(cd benchmarks && npm unlink @ruzito/oas-ls-backend-asm-script)
+
+# unlink vanilla
+(cd backend_vanilla && npm unlink -g)
+
+# unlink asm_script
+(cd backend_asm_script && npm unlink -g)
