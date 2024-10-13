@@ -7,6 +7,9 @@ set -euxo pipefail
 # uplink asm_script
 (cd backend_asm_script && npm link)
 
+# uplink codemirror frontend
+(cd frontend_codemirror && npm link)
+
 # downlink tests
 (cd integration_tests && npm link @ruzito/oas-ls-backend-vanilla)
 (cd integration_tests && npm link @ruzito/oas-ls-backend-asm-script)
@@ -14,3 +17,12 @@ set -euxo pipefail
 # downlink benchmarks
 (cd benchmarks && npm link @ruzito/oas-ls-backend-vanilla)
 (cd benchmarks && npm link @ruzito/oas-ls-backend-asm-script)
+
+# downlink codemirror frontens
+(cd frontend_codemirror && npm link @ruzito/oas-ls-backend-vanilla)
+(cd frontend_codemirror && npm link @ruzito/oas-ls-backend-asm-script)
+
+# downlink end_to_end
+# (cd codemirror_test && npm link @ruzito/oas-ls-backend-vanilla)
+# (cd codemirror_test && npm link @ruzito/oas-ls-backend-asm-script)
+(cd codemirror_test && npm link @ruzito/oas-ls-codemirror)

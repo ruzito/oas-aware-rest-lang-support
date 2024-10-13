@@ -9,6 +9,11 @@ set -euxo pipefail
 (cd benchmarks && npm unlink @ruzito/oas-ls-backend-vanilla)
 (cd benchmarks && npm unlink @ruzito/oas-ls-backend-asm-script)
 
+# unlink end_to_end
+# (cd codemirror_test && npm unlink @ruzito/oas-ls-backend-vanilla)
+# (cd codemirror_test && npm unlink @ruzito/oas-ls-backend-asm-script)
+(cd codemirror_test && npm unlink @ruzito/oas-ls-codemirror)
+
 # unlink vanilla
 (cd backend_vanilla && npm unlink -g)
 

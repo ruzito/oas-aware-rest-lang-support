@@ -5,3 +5,5 @@ set -euxo pipefail
 (cd backend_vanilla && npm ci)
 (cd benchmarks && npm ci)
 (cd integration_tests && npm ci)
+(cd codemirror_test && npm ci)
+(cd frontend_codemirror && npm ci)

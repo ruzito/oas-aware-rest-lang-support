@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+# Command in dir1
+(
+    cd codemirror_test || exit
+    npm run dev > vite.log 2> vite.err.log
+) &
+
+# # Command in dir2
+# (
+#     cd monaco_test || exit
+#     npm run dev > vite.log 2> vite.err.log
+# ) &
+
+sleep 2
+
+echo 'Codemirror:'
+grep 'http://' codemirror_test/vite.log
+
+# echo 'Monaco:'
+# grep 'http://' monaco_test/vite.log
+
+wait

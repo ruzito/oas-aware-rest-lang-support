@@ -1,0 +1,6 @@
+#!/bin/bash
+set -euxo pipefail
+
+run/install
+run/link
+run/build
