@@ -1,0 +1,11 @@
+#!/bin/bash
+set -euxo pipefail
+
+run/clean-local
+
+rm -rf */node_modules/
+rm -rf node_modules/
+
+rm -rf */build/
+rm -rf build/
+rm -rf */dist/

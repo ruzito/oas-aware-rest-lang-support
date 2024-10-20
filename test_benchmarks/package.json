@@ -1,0 +1,19 @@
+{
+  "name": "test_benchmarks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test ./*.js",
+    "build": "echo TODO"
+  },
+  "keywords": [],
+  "author": "ruzito",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@local/oas-ls-backend-vanilla": "1.0.0",
+    "@local/oas-ls-backend-asm-script": "1.0.0"
+  }
+}

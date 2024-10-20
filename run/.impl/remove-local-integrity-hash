@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euxo pipefail
+
+for lock in */package-lock.json
+do
+    jq '.packages |= with_entries( if (.key | startswith("node_modules/@local")) then .value |= del(.integrity) else . end )'  "$lock" > "$lock.new"
+    mv "$lock.new" "$lock"
+done

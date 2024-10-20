@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euxo pipefail
+
+rm -rf */node_modules/@local/
+rm -rf */node_modules/.vite/
+
+
+run/.impl/remove-local-integrity-hash
+run/.impl/clean-local-cache

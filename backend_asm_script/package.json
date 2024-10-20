@@ -1,6 +1,6 @@
 {
-  "name": "@ruzito/oas-ls-backend-asm-script",
-  "version": "0.0.1",
+  "name": "@local/oas-ls-backend-asm-script",
+  "version": "1.0.0",
   "description": "",
   "author": "ruzito",
   "main": "./build/index.js",

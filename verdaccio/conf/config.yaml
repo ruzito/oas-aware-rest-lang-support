@@ -1,0 +1,71 @@
+# storage: /verdaccio/storage
+# max_body_size: 100mb
+
+# web:
+#   enable: true
+#   title: My private NPM registry
+#   gravatar: true
+#   sort_packages: asc
+
+# # log settings
+# logs:
+#   - { type: stdout, format: pretty, level: trace }
+
+listen:
+- 0.0.0.0:4873              # listen on all addresses (INADDR_ANY)
+
+# path to a directory with all packages
+storage: /verdaccio/storage/data
+# path to a directory with plugins to include
+plugins: /verdaccio/plugins
+
+# https://verdaccio.org/docs/webui
+web:
+  title: Verdaccio
+
+
+# https://verdaccio.org/docs/configuration#authentication
+# auth:
+#   htpasswd:
+#     # file: /verdaccio/storage/htpasswd
+#     max_users: -1
+    # Maximum amount of users allowed to register, defaults to "+infinity".
+    # You can set this to -1 to disable registration.
+    # max_users: 1000
+    # Hash algorithm, possible options are: "bcrypt", "md5", "sha1", "crypt".
+    # algorithm: bcrypt # by default is crypt, but is recommended use bcrypt for new installations
+    # Rounds number for "bcrypt", will be ignored for other algorithms.
+    # rounds: 10
+
+# https://verdaccio.org/docs/configuration#uplinks
+# a list of other known repositories we can talk to
+# uplinks:
+#   npmjs:
+#     url: https://registry.npmjs.org/
+
+# Learn how to protect your packages
+# https://verdaccio.org/docs/protect-your-dependencies/
+# https://verdaccio.org/docs/configuration#packages
+packages:
+  '@local/*':
+    # scoped packages
+    access: $anonymous
+    publish: $anonymous
+
+publish:
+  allow_offline: true
+
+# https://verdaccio.org/docs/configuration#server
+# You can specify HTTP/1.1 server keep alive timeout in seconds for incoming connections.
+# A value of 0 makes the http server behave similarly to Node.js versions prior to 8.0.0, which did not have a keep-alive timeout.
+# WORKAROUND: Through given configuration you can workaround following issue https://github.com/verdaccio/verdaccio/issues/301. Set to 0 in case 60 is not enough.
+server:
+  keepAliveTimeout: 60
+
+# middlewares:
+#   audit:
+#     enabled: true
+
+# https://verdaccio.org/docs/logger
+# log settings
+log: { type: stdout, format: pretty, level: http }

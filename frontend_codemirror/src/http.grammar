@@ -1,0 +1,33 @@
+@top Request {
+  Method " " Path " " Version "\n"
+  Headers "\n"
+  Body
+}
+
+Method { method }
+
+Version { version }
+
+Headers { (Header "\n")* }
+
+Header { HeaderKey ": " HeaderValue }
+
+HeaderKey { keyVal }
+
+HeaderValue { keyVal }
+
+Path { noSpaceLine }
+
+Body { line? ("\n"+ line)* }
+
+@tokens {
+    method { "GET" | "POST" | "PUT" | "DELETE" | "PATCH" }
+    version { "HTTP/" ( ( @digit "." @digit ) | @digit ) }
+    noSpaceLine { ![ \n]+ }
+    line { ![\n]+ }
+    keyVal { ![:\n]+ }
+}
+
+@external propSource jsonHighlighting from "./highlight"
+
+@skip {}

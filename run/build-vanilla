@@ -1,5 +1,0 @@
-#!/bin/bash
-set -euxo pipefail
-
-(cd backend_asm_script && npm run build)
-(cd backend_vanilla && npm run build)

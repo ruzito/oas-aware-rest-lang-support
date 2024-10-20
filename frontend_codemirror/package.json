@@ -1,0 +1,38 @@
+{
+  "name": "@local/oas-ls-codemirror",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.ts",
+  "scripts": {
+    "test": "node --test ./build/tests/*.js",
+    "build": "lezer-generator src/http.grammar -o src/http_parser.ts && tsc -p ."
+  },
+  "peerDependencies": {
+    "@codemirror/autocomplete": "^6.18.1",
+    "@codemirror/lang-json": "^6.0.0",
+    "@codemirror/language": "^6.10.3",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/view": "^6.0.0",
+    "@lezer/generator": "^1.7.1",
+    "codemirror": "^6.0.1"
+  },
+  "dependencies": {
+    "@lezer/generator": "^1.7.1",
+    "@local/oas-ls-backend-asm-script": "1.0.0",
+    "@local/oas-ls-backend-vanilla": "1.0.0",
+    "markdown-it": "^14.1.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "typescript": "^5.5.4"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./build/main.js",
+      "types": "./build/main.d.ts"
+    }
+  }
+}

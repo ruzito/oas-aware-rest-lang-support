@@ -1,7 +1,7 @@
 import {describe, test} from "node:test";
 import assert from "node:assert/strict";
 
-import * as wasm from "@ruzito/oas-ls-backend-asm-script/bind_test";
+import * as wasm from "@local/oas-ls-backend-asm-script/bind_test";
 
 
 describe("wasm bindings", () => {
@@ -18,5 +18,4 @@ describe("wasm bindings", () => {
         wasm.register_callback(() => { return 12; })
         assert.strictEqual(wasm.dummy_callback(), 12);
     })
-    
 })

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-run/clean
+run/clean-local
 
 run/.impl/start-local-npm
 
@@ -19,7 +19,7 @@ run/.impl/remove-local-integrity-hash
 # End to end layer
 (cd test_benchmarks && npm $icmd && npm run build)
 (cd test_integration && npm $icmd && npm run build)
-(cd test_codemirror && npm $icmd && npm run build)
+(cd test_codemirror && npm $icmd && npm run build && touch src/main.ts)
 run/.impl/remove-local-integrity-hash
 
 # run/.impl/stop-local-npm

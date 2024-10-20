@@ -1,5 +1,4 @@
 #!/bin/bash
 set -euxo pipefail
 
-cd test_integration
-npm run test
+docker stop verdaccio || exit 0

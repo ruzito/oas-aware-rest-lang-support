@@ -1,9 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+run/rebuild
+
 # Command in dir1
 (
-    cd codemirror_test || exit
+    cd test_codemirror || exit
     npm run dev > vite.log 2> vite.err.log
 ) &
 
@@ -16,7 +18,7 @@ set -euo pipefail
 sleep 2
 
 echo 'Codemirror:'
-grep 'http://' codemirror_test/vite.log
+grep 'http://' test_codemirror/vite.log
 
 # echo 'Monaco:'
 # grep 'http://' monaco_test/vite.log
