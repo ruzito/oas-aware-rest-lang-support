@@ -19,7 +19,7 @@ export async function loadOAS(oas: string) {
 export async function requestDocs(text: string, offset: number): Promise<Markdown> {
     let doc_md = `
 # Doc markdown
-<h1>what</h1>
+<h1>8</h1>
 what is this
 `.trim()
     return doc_md

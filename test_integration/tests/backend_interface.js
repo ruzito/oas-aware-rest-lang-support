@@ -82,13 +82,13 @@ describe("compare backends", () => {
     before(async () => { return await setOAS("") })
     describe("empty", async () => {
         compare("requestDocs", async (be) => {
-            await be.requestDocs("", 0)
+            return await be.requestDocs("", 0)
         })
         compare("requestCompletions", async (be) => {
-            await be.requestCompletions("", 0)
+            return await be.requestCompletions("", 0)
         })
         compare("requestHints", async (be) => {
-            await be.requestHints("", 0)
+            return await be.requestHints("", 0)
         })
     })
 })

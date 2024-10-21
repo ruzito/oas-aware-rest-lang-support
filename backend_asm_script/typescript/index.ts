@@ -1,3 +1,5 @@
+import * as wasm from "../build/asm.js"
+
 type Markdown = string | ""
 type PlainString = string | ""
 export const enum CompletionType {
@@ -19,7 +21,7 @@ export async function loadOAS(oas: string) {
 export async function requestDocs(text: string, offset: number): Promise<Markdown> {
     let doc_md = `
 # Doc markdown
-<h1>what</h1>
+<h1>${wasm.add(3,5)}</h1>
 what is this
 `.trim()
     return doc_md

@@ -12,9 +12,8 @@
     "test": "node --test ./tests/*.js",
     "asbuild:debug": "asc assembly/index.ts --target debug",
     "asbuild:release": "asc assembly/index.ts --target release",
-    "asbuild:bind_test": "asc assembly/bind_test.ts --target bind_test",
     "tscbuild": "tsc -p typescript",
-    "build": "npm run asbuild:debug && npm run asbuild:release && npm run asbuild:bind_test && npm run tscbuild"
+    "build": "npm run asbuild:debug && npm run asbuild:release && npm run tscbuild"
   },
   "keywords": [],
   "license": "MIT",

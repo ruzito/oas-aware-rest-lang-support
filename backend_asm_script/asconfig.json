@@ -17,15 +17,6 @@
       "shrinkLevel": 0,
       "converge": false,
       "noAssert": false
-    },
-    "bind_test": {
-      "outFile": "build/bind_test.wasm",
-      "textFile": "build/bind_test.wat",
-      "sourceMap": true,
-      "optimizeLevel": 0,
-      "shrinkLevel": 0,
-      "converge": false,
-      "noAssert": false
     }
   },
   "options": {
