@@ -4,17 +4,19 @@ This repo is a monorepo for various npm packages to enable language support for 
 
 ## User Manual
 
-### Dependencies on PATH
+### Dependencies needed on PATH
 
-```
-docker # without sudo
-npm
-bash
-jq
-curl
-grep
-xargs
-```
+
+- `bash`
+- `npm`
+- `docker`
+   - without sudo
+   - for local npm repo so I can publish and install locally
+   - without credentials and semver bumps for every single code change
+- `jq`
+- `curl`
+- `grep`
+- `xargs`
 
 ### First full dev build
 
@@ -36,10 +38,6 @@ run/test # automated tests
 run/web # start web server GUIs
 ```
 
-## Dev manual
-
-If you want to change code as well, the following might come in handy
-
 ### Beware
 
 - Codemirror packages are heavily deprecated when changing from version 5 to 6
@@ -50,8 +48,6 @@ If you want to change code as well, the following might come in handy
 - Deprecated packages I have accidentally used at some point:
     - `@codemirror/highlight`
     - `@codemirror/rangeset` - which is a dependency of `@codemirror/highlight`
-
-
 
 ## Architecture
 
@@ -88,3 +84,5 @@ flowchart BT;
 [Lezer docs](https://lezer.codemirror.net/docs/guide/#tokens)
 [Codemirror LSP - How it works](https://hjr265.me/blog/codemirror-lsp/)
 [Codemirror LSP - repo](https://github.com/FurqanSoftware/codemirror-languageserver/)
+[OAS - human readable docs](https://swagger.io/docs/specification/v3_0/about/)
+[OAS - spec](https://swagger.io/specification/)
