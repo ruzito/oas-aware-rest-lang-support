@@ -7,6 +7,12 @@ run/.impl/start-local-npm
 
 icmd=${1:-ci}
 
+if [[ "$icmd" = "reinstall" ]]
+then
+    run/unlock
+    icmd="install"
+fi
+
 # Independent layer
 (cd backend_asm_script && npm $icmd && npm run build && npm publish)
 (cd backend_vanilla && npm $icmd && npm run build && npm publish)

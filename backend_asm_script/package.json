@@ -26,10 +26,6 @@
     ".": {
       "import": "./build/index.js",
       "types": "./build/index.d.ts"
-    },
-    "./bind_test": {
-      "import": "./build/vanilla_bind_test_exports.js",
-      "types": "./build/vanilla_bind_test_exports.d.ts"
     }
   }
 }
