@@ -1,9 +1,9 @@
 type Markdown = string | ""
 type PlainString = string | ""
-export const enum CompletionType {
+export enum CompletionType {
     DUMMY_TYPE = "dummyType",
 }
-export const enum HintType {
+export enum HintType {
     ERROR = "error",
     WARNING = "warning",
     INFO = "info",
