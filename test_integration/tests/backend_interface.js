@@ -2,10 +2,8 @@ import {describe, test, before} from "node:test";
 import assert from "node:assert/strict";
 
 import * as wasm from "@local/oas-ls-backend-asm-script";
-import * as vanilla from "@local/oas-ls-backend-vanilla";
 
 let impls = [
-    {name: "vanilla", impl: vanilla},
     {name: "wasm", impl: wasm},
 ]
 
@@ -77,18 +75,3 @@ for (let impl of impls) {
         })
     })
 }
-
-describe("compare backends", () => {
-    before(async () => { return await setOAS("") })
-    describe("empty", async () => {
-        compare("requestDocs", async (be) => {
-            return await be.requestDocs("", 0)
-        })
-        compare("requestCompletions", async (be) => {
-            return await be.requestCompletions("", 0)
-        })
-        compare("requestHints", async (be) => {
-            return await be.requestHints("", 0)
-        })
-    })
-})

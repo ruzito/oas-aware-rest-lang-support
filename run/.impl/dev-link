@@ -4,19 +4,15 @@ set -euxo pipefail
 semver="1.0.0"
 
 # downlink tests
-run/.impl/relink_dependency test_integration "@local/oas-ls-backend-vanilla" "$semver"
 run/.impl/relink_dependency test_integration "@local/oas-ls-backend-asm-script" "$semver"
 
 # downlink benchmarks
-run/.impl/relink_dependency test_benchmarks "@local/oas-ls-backend-vanilla" "$semver"
 run/.impl/relink_dependency test_benchmarks "@local/oas-ls-backend-asm-script" "$semver"
 
 # downlink codemirror frontens
-run/.impl/relink_dependency frontend_codemirror "@local/oas-ls-backend-vanilla" "$semver"
 run/.impl/relink_dependency frontend_codemirror "@local/oas-ls-backend-asm-script" "$semver"
 
 # downlink end_to_end
-# run/.impl/relink_dependency test_codemirror "@local/oas-ls-backend-vanilla" "$semver"
 # run/.impl/relink_dependency test_codemirror "@local/oas-ls-backend-asm-script" "$semver"
 run/.impl/relink_dependency test_codemirror "@local/oas-ls-codemirror" "$semver"
 

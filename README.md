@@ -57,19 +57,18 @@ If you want to change code as well, the following might come in handy
 
 ```mermaid
 flowchart BT;
-    subgraph backend[One of the backends]
-        backend_vanilla;
-        backend_asm_script;
-    end
-    frontend_codemirror--npm install-->backend;
-    frontend_monaco--npm install-->backend;
-    frontend_lsp--npm install-->backend;
+    backend;
     subgraph project[This project]
         backend;
-        frontend_lsp;
-        frontend_monaco;
         frontend_codemirror;
     end
+    subgraph other_project[Someone else's project]
+        frontend_lsp;
+        frontend_monaco;
+    end
+    frontend_codemirror--npm install-->backend;
+    frontend_lsp--npm install-->backend;
+    frontend_monaco--npm install-->backend;
     subgraph Usage
         LSP;
         Monaco;
@@ -79,7 +78,6 @@ flowchart BT;
     Monaco[Monaco web app]--npm install-->frontend_monaco;
     Codemirror[Codemirror web app]--npm install-->frontend_codemirror;
     style project fill:#00ff000a
-    style backend fill:#00000000
     style Usage fill:#0000000a
 ```
 
