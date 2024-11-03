@@ -148,9 +148,8 @@ async function requestHints(text: string): Promise<Diagnostic[]> {
   return diagnostics
 }
 
-export async function loadOAS(oas: string) {
-  await be.loadOAS(oas)
-}
+export const parseOas = be.parseOas
+export const fetchOas = be.fetchOas
 
 export function http() {
   console.log("Initializing extension")

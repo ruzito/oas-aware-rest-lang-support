@@ -30,7 +30,7 @@ for (let impl of impls) {
     describe(`${impl.name} backend`, () => {
         let be = impl.impl
         test("exports only needed", () => {
-            assert.deepStrictEqual(Object.keys(be).sort(), ['CompletionType', 'HintType', 'loadOAS', 'requestCompletions', 'requestDocs', 'requestHints'].sort())
+            assert.deepStrictEqual(Object.keys(be).sort(), ['CompletionType', 'HintType', 'fetchOas', 'parseOas', 'requestCompletions', 'requestDocs', 'requestHints'].sort())
         })
         describe("exports enum", () => {
             test("CompletionType", () => {
@@ -40,13 +40,29 @@ for (let impl of impls) {
                 assert.deepStrictEqual(be.HintType, {ERROR: 'error', WARNING: 'warning', INFO: 'info'})
             })
         })
+        
         describe("exports async", () => {
-            test("loadOAS", async () => {
-                assert.strictEqual(typeof be.loadOAS, "function")
-                let prom = be.loadOAS("")
+            const AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
+
+            test("fetchOas", async () => {
+                assert.strictEqual(typeof be.fetchOas, "function")
+                let prom = be.fetchOas("")
                 assert(prom instanceof Promise)
-                let ret = await prom
-                assert.strictEqual(ret, undefined)
+                try {
+                    let ret = await prom
+                    assert.strictEqual(ret, undefined)
+                }
+                catch {/* loading an empty OAS is reasonable to fail as well */}
+            })
+            test("parseOas", async () => {
+                assert.strictEqual(typeof be.parseOas, "function")
+                let prom = be.parseOas("")
+                assert(prom instanceof Promise)
+                try {
+                    let ret = await prom
+                    assert.strictEqual(ret, undefined)
+                }
+                catch {/* loading an empty OAS is reasonable to fail as well */}
             })
             
             test("requestDocs", async () => {

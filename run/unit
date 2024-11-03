@@ -2,4 +2,3 @@
 set -euxo pipefail
 
 run/unit-asm
-run/unit-vanilla

@@ -1,7 +1,7 @@
 import { EditorView, basicSetup } from 'codemirror'
 import {EditorState} from "@codemirror/state"
 import {EditorViewConfig} from "@codemirror/view"
-import {http, loadOAS} from '@local/oas-ls-codemirror';
+import * as oasFrontend from '@local/oas-ls-codemirror';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import {tags} from "@lezer/highlight"
 
@@ -35,7 +35,7 @@ const myHighlightStyle = HighlightStyle.define([
 
 let cfg: EditorViewConfig = {
   doc: code,
-  extensions: [basicSetup, http(), syntaxHighlighting(myHighlightStyle)],
+  extensions: [basicSetup, oasFrontend.http(), syntaxHighlighting(myHighlightStyle)],
   parent: document.getElementById('editor') as HTMLElement,
 }
 let state: EditorState = EditorState.create(cfg)
@@ -48,26 +48,13 @@ new EditorView(cfg);
 const inputElement = document.getElementById('oas-url') as HTMLInputElement;
 const loadBtn = document.getElementById('oas-url-btn') as HTMLInputElement;
 
-async function setOAS(oas: string): Promise<void> {
-  console.log("load", oas)
-  await loadOAS(oas)
-}
-
-async function getOAS(url: string): Promise<string> {
-  const response = await fetch(url);
-  if (!response.ok) {
-      throw new Error('Network response was not ok');
-  }
-  const data = await response.text();
-  return data;
-}
-
 loadBtn.addEventListener('click', async (event: Event) => {
     console.log(inputElement.value);
     let url = inputElement.value
     try {
-      let oas = await getOAS(url)
-      await setOAS(oas)
+      // let oas = await getOAS(url)
+      // await setOAS(oas)
+      await oasFrontend.fetchOas(url)
     }
     catch (err) {
       alert(`Error fetching OAS:\nurl: ${url}\nerror: ${err}`)

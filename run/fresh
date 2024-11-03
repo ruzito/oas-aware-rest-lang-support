@@ -14,17 +14,17 @@ then
 fi
 
 # Independent layer
-(cd backend_asm_script && npm $icmd && npm run build && npm publish)
+(cd backend_asm_script && npm $icmd --loglevel silly && npm run build && npm publish)
 run/.impl/remove-local-integrity-hash
 
 # Frontend layer
-(cd frontend_codemirror && npm $icmd && npm run build && npm publish)
+(cd frontend_codemirror && npm $icmd --loglevel silly && npm run build && npm publish)
 run/.impl/remove-local-integrity-hash
 
 # End to end layer
-(cd test_benchmarks && npm $icmd && npm run build)
-(cd test_integration && npm $icmd && npm run build)
-(cd test_codemirror && npm $icmd && npm run build)
+(cd test_benchmarks && npm $icmd --loglevel silly && npm run build)
+(cd test_integration && npm $icmd --loglevel silly && npm run build)
+(cd test_codemirror && npm $icmd --loglevel silly && npm run build)
 run/.impl/remove-local-integrity-hash
 
 # run/.impl/stop-local-npm

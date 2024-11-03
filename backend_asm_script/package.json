@@ -21,6 +21,9 @@
     "assemblyscript": "^0.27.29",
     "typescript": "^5.5.4"
   },
+  "dependencies": {
+    "yaml": "^2.6.0"
+  },
   "type": "module",
   "exports": {
     ".": {

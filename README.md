@@ -86,3 +86,5 @@ flowchart BT;
 [Codemirror LSP - repo](https://github.com/FurqanSoftware/codemirror-languageserver/)
 [OAS - human readable docs](https://swagger.io/docs/specification/v3_0/about/)
 [OAS - spec](https://swagger.io/specification/)
+[OAS - actual spec](https://spec.openapis.org)
+[OAS 3.0 to 3.1.0](https://www.openapis.org/blog/2021/02/16/migrating-from-openapi-3-0-to-3-1-0)
