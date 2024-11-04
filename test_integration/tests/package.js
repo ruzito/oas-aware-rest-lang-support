@@ -5,7 +5,7 @@ import * as fs from 'fs';
 
 const int_pkg_json = JSON.parse(fs.readFileSync('./package.json'));
 const bench_pkg_json = JSON.parse(fs.readFileSync('../test_benchmarks/package.json'));
-const asm_pkg_json = JSON.parse(fs.readFileSync('../backend_asm_script/package.json'));
+const asm_pkg_json = JSON.parse(fs.readFileSync('../backend/package.json'));
 
 const pub_pkgs = [asm_pkg_json]
 const priv_pkgs = [int_pkg_json, bench_pkg_json]

@@ -14,7 +14,7 @@ then
 fi
 
 # Independent layer
-(cd backend_asm_script && npm $icmd --loglevel silly && npm run build && npm publish)
+(cd backend && npm $icmd --loglevel silly && npm run build && npm publish)
 run/.impl/remove-local-integrity-hash
 
 # Frontend layer
