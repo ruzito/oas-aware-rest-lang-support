@@ -88,3 +88,7 @@ flowchart BT;
 [OAS - spec](https://swagger.io/specification/)
 [OAS - actual spec](https://spec.openapis.org)
 [OAS 3.0 to 3.1.0](https://www.openapis.org/blog/2021/02/16/migrating-from-openapi-3-0-to-3-1-0)
+
+OAS Keywords
+
+- Info Object - holds the docs - (label, brief, md)
