@@ -99,8 +99,8 @@ export async function loadOAS(oas: string, format: OASFormat = OASFormat.JSON): 
     if (oasRoot === null) {
         throw new Error(`Could not parse OAS specification\n${oas}`)
     }
-    // console.log({ "root": oasRoot })
-    // console.log({ "externalRefs": oasExternalRefs })
+    console.log({ "root": oasRoot })
+    console.log({ "externalRefs": oasExternalRefs })
 }
 
 export async function loadURL(url: string): Promise<void> {
@@ -109,8 +109,8 @@ export async function loadURL(url: string): Promise<void> {
     if (oasRoot === null) {
         throw new Error(`Could not fetch OAS specification \`${url}\``)
     }
-    // console.log({ "root": oasRoot })
-    // console.log({ "externalRefs": oasExternalRefs })
+    console.log({ "root": oasRoot })
+    console.log({ "externalRefs": oasExternalRefs })
 }
 
 export function ready(): boolean {

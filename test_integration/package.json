@@ -13,6 +13,6 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@local/oas-ls-backend-asm-script": "1.0.0"
+    "@local/oas-ls-backend": "1.0.0"
   }
 }

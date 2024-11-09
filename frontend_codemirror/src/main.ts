@@ -12,7 +12,7 @@ import { parseMixed } from '@lezer/common';
 import {tags} from "@lezer/highlight"
 import {linter, Diagnostic} from "@codemirror/lint"
 
-import * as be from '@local/oas-ls-backend-asm-script';
+import * as be from '@local/oas-ls-backend';
 
 import MarkdownIt from 'markdown-it';
 const md = new MarkdownIt({

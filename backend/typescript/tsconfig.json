@@ -106,5 +106,5 @@
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
   "include": ["../typescript/**/*", "../tests/**/*"],
-  "exclude": ["../build/*.d.ts"]
+  "exclude": ["../build/*.d.ts", "**/*.wasm"],
 }

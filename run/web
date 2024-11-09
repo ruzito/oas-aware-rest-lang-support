@@ -1,8 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-run/rebuild
-
 # Command in dir1
 (
     cd test_codemirror || exit

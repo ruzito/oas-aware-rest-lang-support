@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@lezer/generator": "^1.7.1",
-    "@local/oas-ls-backend-asm-script": "1.0.0",
+    "@local/oas-ls-backend": "1.0.0",
     "markdown-it": "^14.1.0"
   },
   "devDependencies": {

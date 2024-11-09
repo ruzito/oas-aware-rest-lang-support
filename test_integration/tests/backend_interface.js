@@ -1,93 +1,71 @@
-import {describe, test, before} from "node:test";
+import { describe, test, before } from "node:test";
 import assert from "node:assert/strict";
 
-import * as wasm from "@local/oas-ls-backend-asm-script";
-
-let impls = [
-    {name: "wasm", impl: wasm},
-]
-
+import * as be from "@local/oas-ls-backend";
 
 async function setOAS(oas) {
-    for (let impl of impls) {
-        await impl.impl.loadOAS(oas)
-    }
+    await be.loadOAS(oas)
 }
 
-async function compare(name, foo) {
-    test(name, async () => {
-        let rets = await Promise.all(impls.map(async (impl) => {
-            return {impl: impl.name, result: await foo(impl.impl)}
-        }))
-        for (let ret in rets) {
-            if (ret == 0) {continue}
-            assert.deepStrictEqual(rets[0].result, rets[ret].result)
-        }
+describe(`backend`, () => {
+    test("exports only needed", () => {
+        assert.deepStrictEqual(Object.keys(be).sort(), ['CompletionType', 'HintType', 'fetchOas', 'parseOas', 'requestCompletions', 'requestDocs', 'requestHints'].sort())
     })
-}
-
-for (let impl of impls) {
-    describe(`${impl.name} backend`, () => {
-        let be = impl.impl
-        test("exports only needed", () => {
-            assert.deepStrictEqual(Object.keys(be).sort(), ['CompletionType', 'HintType', 'fetchOas', 'parseOas', 'requestCompletions', 'requestDocs', 'requestHints'].sort())
+    describe("exports enum", () => {
+        test("CompletionType", () => {
+            assert.deepStrictEqual(be.CompletionType, { DUMMY_TYPE: "dummyType" })
         })
-        describe("exports enum", () => {
-            test("CompletionType", () => {
-                assert.deepStrictEqual(be.CompletionType, {DUMMY_TYPE: "dummyType"})
-            })
-            test("HintType", () => {
-                assert.deepStrictEqual(be.HintType, {ERROR: 'error', WARNING: 'warning', INFO: 'info'})
-            })
-        })
-        
-        describe("exports async", () => {
-            const AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
-
-            test("fetchOas", async () => {
-                assert.strictEqual(typeof be.fetchOas, "function")
-                let prom = be.fetchOas("")
-                assert(prom instanceof Promise)
-                try {
-                    let ret = await prom
-                    assert.strictEqual(ret, undefined)
-                }
-                catch {/* loading an empty OAS is reasonable to fail as well */}
-            })
-            test("parseOas", async () => {
-                assert.strictEqual(typeof be.parseOas, "function")
-                let prom = be.parseOas("")
-                assert(prom instanceof Promise)
-                try {
-                    let ret = await prom
-                    assert.strictEqual(ret, undefined)
-                }
-                catch {/* loading an empty OAS is reasonable to fail as well */}
-            })
-            
-            test("requestDocs", async () => {
-                assert.strictEqual(typeof be.requestDocs, "function")
-                let prom = be.requestDocs("", 0)
-                assert(prom instanceof Promise)
-                let ret = await prom
-                assert.strictEqual(typeof ret, "string")
-            })
-            
-            test("requestCompletions", async () => {
-                assert.strictEqual(typeof be.requestCompletions, "function")
-                let prom = be.requestCompletions("", 0)
-                assert(prom instanceof Promise)
-                let ret = await prom
-                assert(Array.isArray(ret))
-            })
-            
-            test("requestHints", async () => {
-                assert.strictEqual(typeof be.requestHints, "function")
-                let prom = be.requestHints("")
-                assert(prom instanceof Promise)
-                let ret = await prom
-                assert(Array.isArray(ret))
-            })
+        test("HintType", () => {
+            assert.deepStrictEqual(be.HintType, { ERROR: 'error', WARNING: 'warning', INFO: 'info' })
         })
     })
-}
+
+    describe("exports async", () => {
+        const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+
+        test("fetchOas", async () => {
+            assert.strictEqual(typeof be.fetchOas, "function")
+            let prom = be.fetchOas("")
+            assert(prom instanceof Promise)
+            try {
+                let ret = await prom
+                assert.strictEqual(ret, undefined)
+            }
+            catch {/* loading an empty OAS is reasonable to fail as well */ }
+        })
+        test("parseOas", async () => {
+            assert.strictEqual(typeof be.parseOas, "function")
+            let prom = be.parseOas("")
+            assert(prom instanceof Promise)
+            try {
+                let ret = await prom
+                assert.strictEqual(ret, undefined)
+            }
+            catch {/* loading an empty OAS is reasonable to fail as well */ }
+        })
+
+        test("requestDocs", async () => {
+            assert.strictEqual(typeof be.requestDocs, "function")
+            let prom = be.requestDocs("", 0)
+            assert(prom instanceof Promise)
+            let ret = await prom
+            assert.strictEqual(typeof ret, "string")
+        })
+
+        test("requestCompletions", async () => {
+            assert.strictEqual(typeof be.requestCompletions, "function", "not a function")
+            let prom = be.requestCompletions("", 0)
+            assert(prom instanceof Promise, "not an async function")
+            let ret = await prom
+            assert(Array.isArray(ret), "does not return array")
+        })
+
+        test("requestHints", async () => {
+            assert.strictEqual(typeof be.requestHints, "function")
+            let prom = be.requestHints("")
+            assert(prom instanceof Promise)
+            let ret = await prom
+            assert(Array.isArray(ret))
+        })
+    })
+})

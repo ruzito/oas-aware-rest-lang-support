@@ -4,20 +4,20 @@ set -euxo pipefail
 semver="1.0.0"
 
 # downlink tests
-run/.impl/relink_dependency test_integration "@local/oas-ls-backend-asm-script" "$semver"
+run/.impl/relink_dependency test_integration "@local/oas-ls-backend" "$semver"
 
 # downlink benchmarks
-run/.impl/relink_dependency test_benchmarks "@local/oas-ls-backend-asm-script" "$semver"
+run/.impl/relink_dependency test_benchmarks "@local/oas-ls-backend" "$semver"
 
 # downlink codemirror frontens
-run/.impl/relink_dependency frontend_codemirror "@local/oas-ls-backend-asm-script" "$semver"
+run/.impl/relink_dependency frontend_codemirror "@local/oas-ls-backend" "$semver"
 
 # downlink end_to_end
-# run/.impl/relink_dependency test_codemirror "@local/oas-ls-backend-asm-script" "$semver"
+# run/.impl/relink_dependency test_codemirror "@local/oas-ls-backend" "$semver"
 run/.impl/relink_dependency test_codemirror "@local/oas-ls-codemirror" "$semver"
 
 # symlink the local override for .npmrc to publish @local/* packages to localhost npm repo
-for dir in backend_* frontend_* test_*
+for dir in backend frontend_* test_*
 do
     (cd "$dir" && ln -fs ../.npmrc .npmrc)
 done
