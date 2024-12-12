@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euxo pipefail
+
+run/clean-local
+
+run/.impl/start-local-npm
+
+icmd=${1:-ci}
+
+# Independent layer
+(cd backend && npm $icmd && npm publish)
+run/.impl/remove-local-integrity-hash
+
+# Frontend layer
+(cd frontend_codemirror && npm $icmd && npm publish)
+run/.impl/remove-local-integrity-hash
+
+# End to end layer
+(cd test_benchmarks && npm $icmd)
+(cd test_integration && npm $icmd)
+(cd test_codemirror && npm $icmd)
+run/.impl/remove-local-integrity-hash
+
+# run/.impl/stop-local-npm

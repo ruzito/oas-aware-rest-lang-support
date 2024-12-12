@@ -1,24 +1,56 @@
 #!/bin/bash
 set -euxo pipefail
 
-run/clean-local
+for component in "$@"
+do
+case "$component" in
+  backend)
+    (cd backend && npm run build)
+    ;;
 
-run/.impl/start-local-npm
+  backend-grammar)
+    (cd backend && npm run build-grammar && npm run bundle)
+    ;;
 
-icmd=${1:-ci}
+  backend-no-grammar)
+    (cd backend && npm run build-asm && npm run build-asm && npm run bundle)
+    ;;
 
-# Independent layer
-(cd backend && npm $icmd && npm run build && npm publish)
-run/.impl/remove-local-integrity-hash
+  backend-asm)
+    (cd backend && npm run build-asm && npm run bundle)
+    ;;
 
-# Frontend layer
-(cd frontend_codemirror && npm $icmd && npm run build && npm publish)
-run/.impl/remove-local-integrity-hash
+  backend-tsc)
+    (cd backend && npm run build-tsc && npm run bundle)
+    ;;
 
-# End to end layer
-(cd test_benchmarks && npm $icmd && npm run build)
-(cd test_integration && npm $icmd && npm run build)
-(cd test_codemirror && npm $icmd && npm run build && touch src/main.ts)
-run/.impl/remove-local-integrity-hash
+  codemirror)
+    (cd frontend_codemirror && npm run build)
+    ;;
 
-# run/.impl/stop-local-npm
+  codemirror-grammar)
+    (cd frontend_codemirror && npm run build)
+    ;;
+
+  codemirror-tsc)
+    (cd frontend_codemirror && npm run build-tsc)
+    ;;
+
+  web-codemirror)
+    (cd test_codemirror && npm run build)
+    ;;
+
+  stop)
+    run/notify
+    exit 0
+    ;;
+
+  *)
+    echo "Unknown component $component"
+    exit 2
+    ;;
+esac
+done
+
+run/relink
+run/notify

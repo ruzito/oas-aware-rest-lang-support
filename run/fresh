@@ -7,6 +7,9 @@ run/.impl/start-local-npm
 
 icmd=${1:-ci}
 
+instFlags="--loglevel silent"
+instFlags="--loglevel silly"
+
 if [[ "$icmd" = "reinstall" ]]
 then
     run/unlock
@@ -14,17 +17,19 @@ then
 fi
 
 # Independent layer
-(cd backend && npm $icmd --loglevel silly && npm run build && npm publish)
+(cd backend && npm $icmd $instFlags && npm run build && npm publish)
 run/.impl/remove-local-integrity-hash
 
 # Frontend layer
-(cd frontend_codemirror && npm $icmd --loglevel silly && npm run build && npm publish)
+(cd frontend_codemirror && npm $icmd $instFlags && npm run build && npm publish)
 run/.impl/remove-local-integrity-hash
 
 # End to end layer
-(cd test_benchmarks && npm $icmd --loglevel silly && npm run build)
-(cd test_integration && npm $icmd --loglevel silly && npm run build)
-(cd test_codemirror && npm $icmd --loglevel silly && npm run build)
+(cd test_benchmarks && npm $icmd $instFlags && npm run build)
+(cd test_integration && npm $icmd $instFlags && npm run build)
+(cd test_codemirror && npm $icmd $instFlags && npm run build && touch src/main.ts)
 run/.impl/remove-local-integrity-hash
 
 # run/.impl/stop-local-npm
+
+run/notify

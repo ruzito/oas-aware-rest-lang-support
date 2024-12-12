@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# echo -en "\007"
+notify-send "Compilation done"
+
+echo Yes I did notify you
