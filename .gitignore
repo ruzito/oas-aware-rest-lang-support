@@ -1,10 +1,7 @@
 node_modules/
 dist/
 build/
-vite.log
-vite.err.log
 codegen/
 /verdaccio/storage/
-/verdaccio.err.log
-/verdaccio.out.log
 .env
+**/*.log

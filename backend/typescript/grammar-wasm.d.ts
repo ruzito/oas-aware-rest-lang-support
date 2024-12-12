@@ -6,3 +6,11 @@ declare module "tree-sitter-grammar.wasm" {
     const wasmBase64: Uint8Array;
     export default wasmBase64;
 }
+declare module "tree-sitter-json.wasm" {
+    const wasmBase64: Uint8Array;
+    export default wasmBase64;
+}
+declare module "tree-sitter-http.wasm" {
+    const wasmBase64: Uint8Array;
+    export default wasmBase64;
+}

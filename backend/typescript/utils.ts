@@ -74,3 +74,32 @@ export function accessByPath(obj: any, path: Path): any {
         return undefined
     }, obj)
 }
+
+export function exposeDebug(pairs: PlainObject) {
+    let global_ : any = typeof window !== "undefined" ? window : global;
+    global_.debug = global_.debug || {};
+    for (let key in pairs) {
+        global_.debug[key] = pairs[key];
+    }
+}
+
+export function* reversed<T>(it: Iterable<T> | Array<T>): Generator<T> {
+    let arr = null
+    if (Array.isArray(it)) {
+        arr = it
+    }
+    else {
+        arr = Array.from(it)
+    }
+    for (let i = arr.length - 1; i >= 0; i--) {
+        yield arr[i];
+    }
+}
+
+export function reduce<T, U>(iterable: Iterable<T>, reducer: (accumulator: U, current: T) => U, initialValue: U): U {
+    let accumulator = initialValue;
+    for (const value of iterable) {
+        accumulator = reducer(accumulator, value);
+    }
+    return accumulator;
+}

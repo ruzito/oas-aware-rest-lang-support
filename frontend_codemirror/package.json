@@ -5,7 +5,9 @@
   "main": "src/main.ts",
   "scripts": {
     "test": "node --test ./build/tests/*.js",
-    "build": "lezer-generator src/http.grammar -o src/http_parser.ts && tsc -p ."
+    "build-grammar": "lezer-generator src/http.grammar -o src/http_parser.ts",
+    "build-tsc": "tsc -p .",
+    "build": "npm run build-grammar && npm run build-tsc"
   },
   "peerDependencies": {
     "@codemirror/autocomplete": "^6.18.1",

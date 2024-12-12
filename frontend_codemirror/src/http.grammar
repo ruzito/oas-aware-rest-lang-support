@@ -1,7 +1,12 @@
 @top Request {
+  HttpPart
+  separator
+  Body
+}
+
+HttpPart {
   Method " " Path " " Version "\n"
   Headers "\n"
-  Body
 }
 
 Method { method }
@@ -23,6 +28,7 @@ Body { line? ("\n"+ line)* }
 @tokens {
     method { "GET" | "POST" | "PUT" | "DELETE" | "PATCH" }
     version { "HTTP/" ( ( @digit "." @digit ) | @digit ) }
+    separator { '---' '-'* }
     noSpaceLine { ![ \n]+ }
     line { ![\n]+ }
     keyVal { ![:\n]+ }

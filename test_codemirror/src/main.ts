@@ -10,6 +10,13 @@ import {tags} from "@lezer/highlight"
 let json_code = `
 {
   "key": "value",
+  "a": {
+     "b": {
+       "c": [
+         {"d": }
+       ]
+     }
+  },
   "array": [1, 2, 3],
   "nested": { "a": "b" }
 }
@@ -18,6 +25,8 @@ let code = `
 POST /api/data HTTP/1.1
 Host: example.com
 Content-Type: application/json
+
+-----
 
 ${json_code}
 `.trim()
@@ -42,6 +51,16 @@ let state: EditorState = EditorState.create(cfg)
 cfg.state = state
 
 new EditorView(cfg);
+
+let cfg2: EditorViewConfig = {
+  doc: json_code,
+  extensions: [basicSetup, oasFrontend.json(), syntaxHighlighting(myHighlightStyle)],
+  parent: document.getElementById('editor2') as HTMLElement,
+}
+let state2: EditorState = EditorState.create(cfg2)
+cfg2.state = state2
+
+new EditorView(cfg2);
 
 // Load Open API Specification
 

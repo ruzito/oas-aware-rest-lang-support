@@ -1,6 +1,10 @@
 import * as esbuild from 'esbuild'
 import * as fs from 'fs';
 import * as path from 'path';
+import * as glob from 'glob';
+import {builtinModules as builtins} from 'module';
+
+
 
 const wasmInlinePlugin = {
     name: 'wasm-inline',
@@ -11,9 +15,10 @@ const wasmInlinePlugin = {
                 namespace: 'wasm-inline',
             };
         });
-        build.onResolve({ filter: /tree-sitter-grammar\.wasm$/ }, args => {
+        build.onResolve({ filter: /tree-sitter-.*\.wasm$/ }, args => {
+            const filename = path.basename(args.path);
             return {
-                path: path.resolve("./build/tree-sitter-http.wasm"),
+                path: path.resolve(`./build/${filename}`),
                 namespace: 'wasm-inline',
             };
         });
@@ -63,4 +68,19 @@ await esbuild.build({
       js: cjs_compat_fix,
     },
     plugins: [wasmInlinePlugin]
+})
+
+await esbuild.build({
+    entryPoints: glob.sync('build/tests/**/*.js', {ignore: ['build/tests/bundle/**/*']}),
+    bundle: true,
+    outdir: 'build/tests/bundle/',
+    entryNames: '[dir]/test_[name]_bundle',
+    format: 'esm',
+    platform: 'node',
+    banner: {
+      js: cjs_compat_fix,
+    },
+    plugins: [wasmInlinePlugin],
+    external: builtins,
+    keepNames: true
 })
