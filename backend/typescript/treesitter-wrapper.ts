@@ -40,7 +40,7 @@ type Parsers = { json: Parser; http: Parser };
 
 async function init(): Promise<void> {
   if (!tsInitialized) {
-    console.log("Initializing tree-sitter");
+    // console.log("Initializing tree-sitter");
     await Parser.init({ wasmBinary: tswasm });
     await initLangs({
       json: json_parser_wasm,
@@ -72,7 +72,7 @@ async function getQuery(lang: string, q: string): Promise<Query> {
   if (q in inst[lang].queries) {
     return inst[lang].queries[q];
   }
-  console.log("Creating query:", q)
+  // console.log("Creating query:", q)
   inst[lang].queries[q] = inst[lang].lang.query(q);
   return inst[lang].queries[q];
 }
@@ -218,17 +218,17 @@ export function namedNodeQuery(
       i = node.namedChildCount + cond.i;
     }
     if (i < 0 || node.namedChildCount <= i) {
-      console.log("named query: Index out of range", cond.i, "aka", i);
+      // console.log("named query: Index out of range", cond.i, "aka", i);
       return null;
     }
     const target = node.namedChildren[i];
     if (target.type !== cond.name) {
-      console.log(
-        "named query: type does not match - expected:",
-        cond.name,
-        "got:",
-        target.type
-      );
+      // console.log(
+      //   "named query: type does not match - expected:",
+      //   cond.name,
+      //   "got:",
+      //   target.type
+      // );
       return null;
     }
     node = target;
@@ -246,17 +246,17 @@ export function nodeQuery(
       i = node.childCount + cond.i;
     }
     if (i < 0 || node.childCount <= i) {
-      console.log("named query: Index out of range", cond.i, "aka", i);
+      // console.log("named query: Index out of range", cond.i, "aka", i);
       return null;
     }
     const target = node.children[i];
     if (target.type !== cond.name) {
-      console.log(
-        "named query: type does not match - expected:",
-        cond.name,
-        "got:",
-        target.type
-      );
+      // console.log(
+      //   "named query: type does not match - expected:",
+      //   cond.name,
+      //   "got:",
+      //   target.type
+      // );
       return null;
     }
     node = target;

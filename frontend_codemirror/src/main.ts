@@ -51,9 +51,9 @@ async function renderMD(md_str: string): Promise<HTMLElement> {
   return dom
 }
 
-async function requestTooltip(text: string, offset: number): Promise<Tooltip | null> {
-  console.log({ request: "tooltip", text, offset })
-  let docs = await be.requestDocs(text, offset)
+async function requestTooltip(ctx: be.OasContext, text: string, offset: number): Promise<Tooltip | null> {
+  // console.log({ request: "tooltip", text, offset })
+  let docs = await be.requestDocs(text, offset, ctx)
   let dom = await renderMD(docs)
   return {
     "pos": offset,
@@ -72,11 +72,11 @@ function mapCompletionType(t: be.CompletionType): string {
   }
 }
 
-async function requestCompletion(text: string, offset: number, minOffset: number = 0): Promise<CompletionResult | null> {
-  console.log({ request: "completion", text, offset })
+async function requestCompletion(ctx: be.OasContext, text: string, offset: number, minOffset: number = 0): Promise<CompletionResult | null> {
+  // console.log({ request: "completion", text, offset })
   let from = offset
   let to = offset
-  let completions: Completion[] = await Promise.all((await be.requestCompletions(text, offset)).filter((comp) => {
+  let completions: Completion[] = await Promise.all((await be.requestCompletions(text, offset, ctx)).filter((comp) => {
     if (offset < comp.begin || offset > comp.end)
       return false
     if (offset < minOffset)
@@ -103,7 +103,7 @@ async function requestCompletion(text: string, offset: number, minOffset: number
     }
     return completion
   }))
-  console.log({ request: "completion", completions, from, to, range: text.substring(from, to) })
+  // console.log({ request: "completion", completions, from, to, range: text.substring(from, to) })
   return {
     from: from,
     to: to,
@@ -127,8 +127,8 @@ function mapSeverity(t: be.HintType): Severity {
   }
 }
 
-async function requestHints(text: string): Promise<Diagnostic[]> {
-  let hints = await be.requestHints(text)
+async function requestHints(ctx: be.OasContext, text: string): Promise<Diagnostic[]> {
+  let hints = await be.requestHints(text, ctx)
   let diagnostics: Diagnostic[] = await Promise.all(hints.map(async (hint) => {
     let msg = `${hint.name}: ${hint.brief}`.trim()
     let diag: Diagnostic = {
@@ -152,6 +152,7 @@ async function requestHints(text: string): Promise<Diagnostic[]> {
 
 export const parseOas = be.parseOas
 export const fetchOas = be.fetchOas
+export const initOasContext = be.initOasContext
 
 function buildHttpMeta(meta: HttpMeta): string {
   const headers = meta.headers.map((x) => { return `${x.key}: ${x.value}` }).join('\n')
@@ -169,7 +170,7 @@ export function setHttp(meta: HttpMeta) {
 }
 
 type HttpMeta = { method: string, path: string, headers: Array<{ key: string, value: string }> }
-export function json() {
+export function json(ctx: be.OasContext) {
   let ext = [
     // client.of(options.client || new LanguageServerClient({...options, autoClose: true})),
     // documentUri.of('documetUri'),
@@ -177,14 +178,14 @@ export function json() {
     // ViewPlugin.define((view) => (plugin = new LanguageServerPlugin(view, options.allowHTMLContent))),
     hoverTooltip(
       async (view, pos) => {
-        return await requestTooltip(metaStorage + view.state.doc.toString(), pos + metaStorage.length)
+        return await requestTooltip(ctx, metaStorage + view.state.doc.toString(), pos + metaStorage.length)
       }
     ),
     autocompletion({
       override: [
         async (context: CompletionContext) => {
           const { state, pos, explicit } = context;
-          let completions = await requestCompletion(metaStorage + state.doc.toString(), pos + metaStorage.length, metaStorage.length)
+          let completions = await requestCompletion(ctx, metaStorage + state.doc.toString(), pos + metaStorage.length, metaStorage.length)
           if (completions !== null) {
             completions.from -= metaStorage.length
             if (completions.to !== null && completions.to !== undefined) {
@@ -196,7 +197,7 @@ export function json() {
       ]
     }),
     linter(async (view) => {
-      let hints = await requestHints(metaStorage + view.state.doc.toString())
+      let hints = await requestHints(ctx, metaStorage + view.state.doc.toString())
       return bodyOnlyHints(hints)
     })
   ];
@@ -208,8 +209,8 @@ export function json() {
     }
   }
 }
-export function http() {
-  console.log("Initializing extension")
+export function http(ctx: be.OasContext) {
+  // console.log("Initializing extension")
   let ext = [
     // client.of(options.client || new LanguageServerClient({...options, autoClose: true})),
     // documentUri.of('documetUri'),
@@ -217,22 +218,22 @@ export function http() {
     // ViewPlugin.define((view) => (plugin = new LanguageServerPlugin(view, options.allowHTMLContent))),
     hoverTooltip(
       async (view, pos) => {
-        return await requestTooltip(view.state.doc.toString(), pos)
+        return await requestTooltip(ctx, view.state.doc.toString(), pos)
       }
     ),
     autocompletion({
       override: [
         async (context: CompletionContext) => {
           const { state, pos, explicit } = context;
-          return await requestCompletion(state.doc.toString(), pos)
+          return await requestCompletion(ctx, state.doc.toString(), pos)
         }
       ]
     }),
     linter(async (view) => {
-      return await requestHints(view.state.doc.toString())
+      return await requestHints(ctx, view.state.doc.toString())
     })
   ];
-  console.log(ext);
+  // console.log(ext);
   return [
     ext,
     new LanguageSupport(customHttpLanguage),

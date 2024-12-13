@@ -9,7 +9,7 @@ async function setOAS(oas) {
 
 describe(`backend`, () => {
     test("exports only needed", () => {
-        assert.deepStrictEqual(Object.keys(be).sort(), ['CompletionType', 'HintType', 'fetchOas', 'parseOas', 'requestCompletions', 'requestDocs', 'requestHints'].sort())
+        assert.deepStrictEqual(Object.keys(be).sort(), ['CompletionType', 'HintType', 'fetchOas', 'parseOas', 'requestCompletions', 'requestDocs', 'requestHints', 'initOasContext'].sort())
     })
     describe("exports enum", () => {
         test("CompletionType", () => {

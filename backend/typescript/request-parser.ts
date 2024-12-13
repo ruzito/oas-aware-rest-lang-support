@@ -548,7 +548,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
         tail.kind = CompletionKind.OBJECT_KEY;
         setKeyHint(tail, ithPair)
         setKeyRange(tail, ithPair, offset)
-        console.log(">>>", tail.hint)
+        // console.log(">>>", tail.hint)
         debug["why"] = "First";
       } else {
         // check previous pair if we still need to complete that one

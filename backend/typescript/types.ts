@@ -12,3 +12,12 @@ export enum HintType {
     WARNING = "warning",
     INFO = "info",
 }
+
+export type OasSpec = {[key: string]: any} | null
+
+// null => could not fetch
+
+export type OasContext = {
+    root: OasSpec,
+    externalRefs: { [url: string]: OasSpec }
+}

@@ -42,9 +42,11 @@ const myHighlightStyle = HighlightStyle.define([
   // {tag: tags.number, color: "#fc6"},
 ])
 
+const oasContext = oasFrontend.initOasContext()
+
 let cfg: EditorViewConfig = {
   doc: code,
-  extensions: [basicSetup, oasFrontend.http(), syntaxHighlighting(myHighlightStyle)],
+  extensions: [basicSetup, oasFrontend.http(oasContext), syntaxHighlighting(myHighlightStyle)],
   parent: document.getElementById('editor') as HTMLElement,
 }
 let state: EditorState = EditorState.create(cfg)
@@ -54,7 +56,7 @@ new EditorView(cfg);
 
 let cfg2: EditorViewConfig = {
   doc: json_code,
-  extensions: [basicSetup, oasFrontend.json(), syntaxHighlighting(myHighlightStyle)],
+  extensions: [basicSetup, oasFrontend.json(oasContext), syntaxHighlighting(myHighlightStyle)],
   parent: document.getElementById('editor2') as HTMLElement,
 }
 let state2: EditorState = EditorState.create(cfg2)
@@ -68,12 +70,12 @@ const inputElement = document.getElementById('oas-url') as HTMLInputElement;
 const loadBtn = document.getElementById('oas-url-btn') as HTMLInputElement;
 
 loadBtn.addEventListener('click', async (event: Event) => {
-    console.log(inputElement.value);
+    // console.log(inputElement.value);
     let url = inputElement.value
     try {
       // let oas = await getOAS(url)
       // await setOAS(oas)
-      await oasFrontend.fetchOas(url)
+      await oasFrontend.fetchOas(url, oasContext)
     }
     catch (err) {
       alert(`Error fetching OAS:\nurl: ${url}\nerror: ${err}`)

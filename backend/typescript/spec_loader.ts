@@ -4,19 +4,22 @@ import { parse as parseYAML } from "yaml";
 // import Result from "./result"
 
 import * as util from "./utils.js"
+import { OasContext, OasSpec } from "./types.js";
 
-type OASSpec = util.PlainObject | null
-
-// null => could not fetch
-let oasRoot: OASSpec = null
-let oasExternalRefs: { [url: string]: OASSpec } = {}
 
 export enum OASFormat {
     YAML = "YAML",
     JSON = "JSON"
 }
 
-async function parseOAS(spec: string, format: OASFormat): Promise<OASSpec> {
+export function initOasContext(): OasContext {
+    return {
+        root: null,
+        externalRefs: {}
+    }
+}
+
+async function parseOAS(spec: string, format: OASFormat): Promise<OasSpec> {
     let pojo: util.PlainObject = {}
     let tryList = [(x: string) => JSON.parse(x), (x: string) => parseYAML(x)]
     if (format === OASFormat.YAML) {
@@ -38,11 +41,11 @@ async function parseOAS(spec: string, format: OASFormat): Promise<OASSpec> {
     return pojo
 }
 
-async function fetchOAS(url: string): Promise<OASSpec> {
-    if (url in oasExternalRefs) {
-        return oasExternalRefs[url]
+async function fetchOAS(url: string, ctx: OasContext): Promise<OasSpec | null> {
+    if (url in ctx.externalRefs) {
+        return ctx.externalRefs[url]
     }
-    oasExternalRefs[url] = null
+    ctx.externalRefs[url] = null
     let contentType: string | null = null
     let spec: string
 
@@ -73,57 +76,55 @@ async function fetchOAS(url: string): Promise<OASSpec> {
 
     // parse to json
     let pojo = await parseOAS(spec, format)
-    oasExternalRefs[url] = pojo
+    ctx.externalRefs[url] = pojo
 
     // recurse through ref URLs
-    await dereferenceURLs(pojo)
+    await dereferenceURLs(pojo, ctx)
     return pojo
 }
 
-async function dereferenceURLs(pojoOAS: OASSpec) {
+async function dereferenceURLs(pojoOAS: OasSpec, ctx: OasContext) {
     await util.traverseAsync(pojoOAS, async (path: util.Path, url: util.Scalar) => {
         if (path[path.length - 1] !== '$ref') return
         if (typeof url !== "string") return
         if (!url.startsWith('http://') && !url.startsWith('https://')) return
-        if (url in oasExternalRefs) return
+        if (url in ctx.externalRefs) return
 
-        let pojo = await fetchOAS(url)
-        oasExternalRefs[url] = pojo
+        let pojo = await fetchOAS(url, ctx)
+        ctx.externalRefs[url] = pojo
     })
 }
 
-export async function loadOAS(oas: string, format: OASFormat = OASFormat.JSON): Promise<void> {
+export async function loadOAS(oas: string, format: OASFormat = OASFormat.JSON, ctx: OasContext): Promise<void> {
     const pojo = await parseOAS(oas, format)
-    await dereferenceURLs(pojo)
-    oasRoot = pojo
-    if (oasRoot === null) {
+    await dereferenceURLs(pojo, ctx)
+    ctx.root = pojo
+    if (ctx.root === null) {
         throw new Error(`Could not parse OAS specification\n${oas}`)
     }
-    console.log({ "root": oasRoot })
-    console.log({ "externalRefs": oasExternalRefs })
+    console.log("Loaded OasContext", { ctx })
 }
 
-export async function loadURL(url: string): Promise<void> {
-    const root = await fetchOAS(url)
-    oasRoot = root
-    if (oasRoot === null) {
+export async function loadURL(url: string, ctx: OasContext): Promise<void> {
+    const root = await fetchOAS(url, ctx)
+    ctx.root = root
+    if (ctx.root === null) {
         throw new Error(`Could not fetch OAS specification \`${url}\``)
     }
-    console.log({ "root": oasRoot })
-    console.log({ "externalRefs": oasExternalRefs })
+    console.log("Loaded OasContext from URL", { ctx })
 }
 
-export function ready(): boolean {
-    return oasRoot !== null
+export function ready(ctx: OasContext): boolean {
+    return ctx.root !== null
 }
 
-export function getRoot(): OASSpec {
-    return oasRoot
+export function getRoot(ctx: OasContext): OasSpec {
+    return ctx.root
 }
 
-export function getRemote(url: string): OASSpec {
-    if (url in oasExternalRefs) {
-        return oasExternalRefs[url]
+export function getRemote(url: string, ctx: OasContext): OasSpec | null {
+    if (url in ctx.externalRefs) {
+        return ctx.externalRefs[url]
     }
     else {
         return null

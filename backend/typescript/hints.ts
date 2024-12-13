@@ -1,4 +1,4 @@
-import { CompletionType, HintType, Markdown, Completion, Hint } from "./types.js"
+import { CompletionType, HintType, Markdown, Completion, Hint, OasContext } from "./types.js"
 import * as parser from "./request-parser.js"
 import { named, children, predecessors, debug, printTree, indexOf, errors, successors } from "./treesitter-wrapper.js"
 import { SyntaxNode, Tree } from "web-tree-sitter"
@@ -33,7 +33,7 @@ function errorReport(text: string, nodeError: SyntaxNode, rowOffset: number = 0)
 
 
 
-export async function requestHints(text: string): Promise<Hint[]> {
+export async function requestHints(text: string, ctx: OasContext): Promise<Hint[]> {
     const trees = await parser.parse(text)
 
     if (trees === null) {

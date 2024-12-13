@@ -1,4 +1,4 @@
-import { CompletionType, Markdown, Completion } from "./types.js"
+import { CompletionType, Markdown, Completion, OasContext } from "./types.js"
 import * as parser from "./request-parser.js"
 import { named, children, predecessors, debug, printTree, indexOf } from "./treesitter-wrapper.js"
 import { HTTP_SEPARATOR, SEPARATOR_EXPLANATION } from "./constants.js"
@@ -11,9 +11,12 @@ type HttpData = {
     headers: Array<{key: string, val: string}>
 } | null
 async function requestJsonCompletions(tree: Tree, offset: number, httpData: HttpData = null): Promise<Completion[]> {
+    console.log("Requesting JSON Completions")
     const jpath = await parser.getJPath(tree, offset)
-
     console.log({jpath})
+    // TODO: get OAS definition on the jpath
+    // TODO: filter the options based on hint
+    // TODO: prepare replace action
     return [
         { name: jpath.path.toString(), begin: offset, end: offset, result: "", type: CompletionType.DUMMY_TYPE, brief: JSON.stringify(jpath.tail), doc: "" }
     ]
@@ -30,7 +33,7 @@ const addOffset = (subtreeBegin: number) => (completion: Completion): Completion
         end: subtreeBegin + end
     }
 }
-export async function requestCompletions(text: string, offset: number): Promise<Completion[]> {
+export async function requestCompletions(text: string, offset: number, ctx: OasContext): Promise<Completion[]> {
     const trees = await parser.parse(text)
     exposeDebug({trees})
     if (trees === null) {
