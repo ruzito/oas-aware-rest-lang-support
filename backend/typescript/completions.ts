@@ -1,20 +1,17 @@
-import { CompletionType, Markdown, Completion, OasContext } from "./types.js"
+import { CompletionType, Markdown, Completion, OasContext, OasSpec } from "./types.js"
 import * as parser from "./request-parser.js"
 import { named, children, predecessors, debug, printTree, indexOf } from "./treesitter-wrapper.js"
 import { HTTP_SEPARATOR, SEPARATOR_EXPLANATION } from "./constants.js"
 import { exposeDebug, reversed, reduce } from "./utils.js"
 import { SyntaxNode, Tree } from "web-tree-sitter"
+import { JPath, HttpData } from "./types.js"
+import { oasFollowPath } from "./oas-wrapper.js"
 
-type HttpData = {
-    method: string,
-    path: string,
-    headers: Array<{key: string, val: string}>
-} | null
-async function requestJsonCompletions(tree: Tree, offset: number, httpData: HttpData = null): Promise<Completion[]> {
+async function requestJsonCompletions(tree: Tree, offset: number, httpData: HttpData, ctx: OasContext): Promise<Completion[]> {
     console.log("Requesting JSON Completions")
     const jpath = await parser.getJPath(tree, offset)
     console.log({jpath})
-    // TODO: get OAS definition on the jpath
+    const oasAtPath = oasFollowPath(jpath.path, httpData, ctx)
     // TODO: filter the options based on hint
     // TODO: prepare replace action
     return [
@@ -70,7 +67,7 @@ export async function requestCompletions(text: string, offset: number, ctx: OasC
     }
 
     if (jsonOffset !== null) {
-        const comps = await requestJsonCompletions(trees.json, jsonOffset, {method: method ?? "GET", path: path ?? "/", headers})
+        const comps = await requestJsonCompletions(trees.json, jsonOffset, {method: method ?? "GET", path: path ?? "/", headers}, ctx)
         let newComps = comps.map(addOffset(trees.jsonBegin))
         // console.warn({offset, jsonOffset, jsonBegin: trees.jsonBegin})
         // console.warn(newComps)

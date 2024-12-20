@@ -1,4 +1,4 @@
-import * as specLoader from "./spec_loader.js"
+import * as specLoader from "./oas-wrapper.js"
 
 import * as mockApi from "./mock_api.js"
 import * as completions from "./completions.js"

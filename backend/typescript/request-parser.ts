@@ -27,6 +27,8 @@ import {
 } from "./treesitter-wrapper.js";
 import { exposeDebug, reversed, reduce, PlainObject } from "./utils.js";
 
+import { JPath, JPathBody, JPathTail, CompletionKind } from "./types.js";
+
 enum context_part {
   METHOD,
   PATH,
@@ -210,22 +212,6 @@ function getArrayIndex(node: SyntaxNode): number | null {
   return i === -1 ? null : i;
 }
 
-type EnumObject<T> = T[keyof T]
-
-const CompletionKind = {
-  OBJECT_KEY: "objectKey",
-  OBJECT_VALUE: "objectValue",
-  ARRAY_ELEMENT: "arrayElement",
-  ROOT_VALUE: "root",
-  UNKNOWN: "unknown"
-} as const;
-
-type CompletionKind = EnumObject<typeof CompletionKind>
-
-type JPathTail = { kind: CompletionKind, hint: string, range: {beginOffset: number, endOffset: number} };
-type JPathBody = Array<string | number | undefined>;
-
-type JPath = { path: JPathBody; tail: JPathTail };
 type JPathDebug = JPath & { debug?: PlainObject };
 
 // function isKey(root: SyntaxNode): boolean {
