@@ -5,18 +5,37 @@ import { HTTP_SEPARATOR, SEPARATOR_EXPLANATION } from "./constants.js"
 import { exposeDebug, reversed, reduce } from "./utils.js"
 import { SyntaxNode, Tree } from "web-tree-sitter"
 import { JPath, HttpData } from "./types.js"
-import { oasFollowPath } from "./oas-wrapper.js"
+import { getObjectKeys, oasFollowPath } from "./oas-wrapper.js"
 
 async function requestJsonCompletions(tree: Tree, offset: number, httpData: HttpData, ctx: OasContext): Promise<Completion[]> {
     console.log("Requesting JSON Completions")
     const jpath = await parser.getJPath(tree, offset)
     console.log({jpath})
     const oasAtPath = oasFollowPath(jpath.path, httpData, ctx)
+
+    // First attempt:
+    if (jpath.tail.kind === "objectKey") {
+        return getObjectKeys(oasAtPath, ctx).flatMap((key) => {
+            return key.schemas.map((schema: any) => {
+                const desc = (schema as any)?.description
+                return {
+                    name: key.name,
+                    result: key.name,
+                    type: CompletionType.DUMMY_TYPE,
+                    begin: offset,
+                    end: offset,
+                    brief: desc ? "" : key.name,
+                    doc: desc ?? ""
+                }
+            })
+        });
+    }
     // TODO: filter the options based on hint
     // TODO: prepare replace action
-    return [
-        { name: jpath.path.toString(), begin: offset, end: offset, result: "", type: CompletionType.DUMMY_TYPE, brief: JSON.stringify(jpath.tail), doc: "" }
-    ]
+    return []
+    // return [
+    //     { name: jpath.path.toString(), begin: offset, end: offset, result: "", type: CompletionType.DUMMY_TYPE, brief: JSON.stringify(jpath.tail), doc: "" }
+    // ]
 }
 const addOffset = (subtreeBegin: number) => (completion: Completion): Completion => {
     const {name, result, type, brief, doc, begin, end} = completion

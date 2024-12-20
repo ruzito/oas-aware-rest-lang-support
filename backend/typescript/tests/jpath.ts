@@ -9,11 +9,11 @@ import * as rp from "../request-parser.js";
 const assertEq: <T>(actual: unknown, expected: T, message?: string | Error) => asserts actual is T = assert.deepStrictEqual
 const fail = (reason: string) => { throw new Error(reason) }
 
-const logFile = fs.createWriteStream('console-output.log', { flags: 'w' });
+const logFile = fs.createWriteStream('console-output.jpath.log', { flags: 'w' });
 const originalConsoleLog = console.log
 global.console.log = function (...args: any[]) {
   logFile.write(util.format(...args) + '\n');
-  originalConsoleLog(...args)
+//   originalConsoleLog(...args)
 };
 
 function curs(s: string, cursor = '|') {
