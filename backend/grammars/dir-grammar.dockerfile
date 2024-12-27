@@ -45,5 +45,5 @@ RUN tree-sitter build --wasm
 # what we explicitly copied into the scratch image
 FROM scratch
 ARG TREE_SITTER_NAME
-COPY --from=tree-sitter /tree-sitter/${TREE_SITTER_NAME}/. ./build/${TREE_SITTER_NAME}/.
+COPY --from=tree-sitter /tree-sitter/${TREE_SITTER_NAME}/. ./codegen/${TREE_SITTER_NAME}/.
 

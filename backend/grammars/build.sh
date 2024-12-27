@@ -8,7 +8,7 @@ function build_dir() {
 }
 
 cd grammars
-rm -rf ./build/
+rm -rf ./codegen/
 # build_dir http_n_json src
 # build_git http https://github.com/rest-nvim/tree-sitter-http
 build_dir http src

@@ -20,10 +20,10 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
                 const desc = (schema as any)?.description
                 return {
                     name: key.name,
-                    result: key.name,
+                    result: `"${key.name}"`,
                     type: CompletionType.DUMMY_TYPE,
-                    begin: offset,
-                    end: offset,
+                    begin: jpath.tail.range.beginOffset,
+                    end: jpath.tail.range.endOffset,
                     brief: desc ? "" : key.name,
                     doc: desc ?? ""
                 }

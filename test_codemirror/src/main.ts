@@ -7,6 +7,18 @@ import {tags} from "@lezer/highlight"
 
 // Example HTTP request
 
+let evita_request = `
+POST /Brand/list HTTP/1.1
+Host: example.com
+Content-Type: application/json
+
+-----
+
+{
+  
+}
+`
+
 let json_code = `
 {
   "key": "value",
@@ -45,7 +57,7 @@ const myHighlightStyle = HighlightStyle.define([
 const oasContext = oasFrontend.initOasContext()
 
 let cfg: EditorViewConfig = {
-  doc: code,
+  doc: evita_request,
   extensions: [basicSetup, oasFrontend.http(oasContext), syntaxHighlighting(myHighlightStyle)],
   parent: document.getElementById('editor') as HTMLElement,
 }

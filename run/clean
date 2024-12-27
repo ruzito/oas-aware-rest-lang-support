@@ -3,8 +3,13 @@ set -euxo pipefail
 
 run/clean-local
 
-rm -rf */node_modules/
-rm -rf node_modules/
+if [[ "$1" = "offline" ]]
+then
+    echo "Running in ofline mode"
+else
+    rm -rf */node_modules/
+    rm -rf node_modules/
+fi
 
 rm -rf */build/
 rm -rf build/

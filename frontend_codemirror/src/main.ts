@@ -4,17 +4,18 @@ import type {
   CompletionContext,
   CompletionResult,
 } from '@codemirror/autocomplete';
-import { EditorView, Tooltip, hoverTooltip } from '@codemirror/view';
+import { EditorView, PluginValue, Tooltip, ViewPlugin, hoverTooltip } from '@codemirror/view';
 import { parser } from './http_parser';
 import { LRLanguage, LanguageSupport, HighlightStyle, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
 import { jsonLanguage, json as jsonExtension } from '@codemirror/lang-json';
 import { parseMixed } from '@lezer/common';
 import { tags } from "@lezer/highlight"
-import { linter, Diagnostic } from "@codemirror/lint"
+import { linter, Diagnostic, LintSource } from "@codemirror/lint"
 
 import * as be from '@local/oas-ls-backend';
 
 import MarkdownIt from 'markdown-it';
+import { Extension } from '@codemirror/state';
 const md = new MarkdownIt({
   html: false,
   breaks: false,
@@ -169,13 +170,78 @@ export function setHttp(meta: HttpMeta) {
   throw "TODO"
 }
 
+function linterWrapper() {
+  let view_ : EditorView | null = null
+  let plugin_: (PluginValue & {force: ()=>void, set: boolean }) | null = null
+  let lintPlugin_: ViewPlugin<{force: ()=>void, set: boolean }> | null = null
+  let extensionsFromLinter_: Extension[] = []
+  let cronJobId_: any | null = null
+
+  function forceLinting() {
+    if (view_ === null || lintPlugin_ === null) {
+      console.warn("still don't have `view_`")
+      return;
+    }
+    if (extensionsFromLinter_.length == 0) {
+      console.warn("still don't have extensions list")
+      return;
+    }
+    if (lintPlugin_ === null) {
+      for (let ex of extensionsFromLinter_) {
+        if (ex instanceof ViewPlugin) {
+          const plugin = view_.plugin(ex);
+          if (plugin && plugin.set !== undefined && plugin.force !== undefined) {
+            lintPlugin_ = ex
+            plugin_ = plugin
+          }
+        }
+      }
+    }
+    if (plugin_ === null) {
+      console.warn("still didn't find the plugin")
+      return;
+    }
+    plugin_.set = true;
+    plugin_.force();
+    // const plugin = view_.plugin(lintPlugin_);
+    // if (plugin) {
+    //   plugin.set = true;
+    //   plugin.force();
+    // }
+  }
+  function linterInjection(linterSource: LintSource): LintSource{
+    return async (view: EditorView): Promise<readonly Diagnostic[]> => {
+      if (view_ === null) {
+        view_ = view
+      }
+      return await linterSource(view)
+    }
+  }
+
+  function createLinterPlugin(linterSource: LintSource) {
+    extensionsFromLinter_ = [linter(linterInjection(linterSource))].flat()
+    return extensionsFromLinter_
+  }
+
+  function stopLinting() {
+    if (cronJobId_ !== null) {
+      clearInterval(cronJobId_)
+    }
+  }
+
+  function startLinting() {
+    cronJobId_ = setInterval(() => {
+      forceLinting()
+    }, 2000)
+  }
+
+  return {createLinterPlugin, startLinting, stopLinting}
+}
+
 type HttpMeta = { method: string, path: string, headers: Array<{ key: string, value: string }> }
 export function json(ctx: be.OasContext) {
+  // let wrapper = linterWrapper()
   let ext = [
-    // client.of(options.client || new LanguageServerClient({...options, autoClose: true})),
-    // documentUri.of('documetUri'),
-    // languageId.of('http'),
-    // ViewPlugin.define((view) => (plugin = new LanguageServerPlugin(view, options.allowHTMLContent))),
     hoverTooltip(
       async (view, pos) => {
         return await requestTooltip(ctx, metaStorage + view.state.doc.toString(), pos + metaStorage.length)
@@ -196,26 +262,20 @@ export function json(ctx: be.OasContext) {
         }
       ]
     }),
+    // wrapper.createLinterPlugin(async (view) => {
+    //   let hints = await requestHints(ctx, metaStorage + view.state.doc.toString())
+    //   return bodyOnlyHints(hints)
+    // }),
     linter(async (view) => {
       let hints = await requestHints(ctx, metaStorage + view.state.doc.toString())
       return bodyOnlyHints(hints)
     })
   ];
-  return {
-    extension: [ext, jsonExtension()], commands: {
-      setHttpMeta: (meta: HttpMeta) => {
-        metaStorage = buildHttpMeta(meta)
-      }
-    }
-  }
+  return [ext, jsonExtension()]
 }
 export function http(ctx: be.OasContext) {
   // console.log("Initializing extension")
   let ext = [
-    // client.of(options.client || new LanguageServerClient({...options, autoClose: true})),
-    // documentUri.of('documetUri'),
-    // languageId.of('http'),
-    // ViewPlugin.define((view) => (plugin = new LanguageServerPlugin(view, options.allowHTMLContent))),
     hoverTooltip(
       async (view, pos) => {
         return await requestTooltip(ctx, view.state.doc.toString(), pos)

@@ -1,11 +1,13 @@
-import { CompletionType, HintType, Markdown, Completion, Hint, OasContext } from "./types.js"
+import { CompletionType, HintType, Markdown, Completion, Hint, OasContext, HttpData } from "./types.js"
 import * as parser from "./request-parser.js"
 import { named, children, predecessors, debug, printTree, indexOf, errors, successors } from "./treesitter-wrapper.js"
 import { SyntaxNode, Tree } from "web-tree-sitter"
 import { HTTP_SEPARATOR, SEPARATOR_EXPLANATION } from "./constants.js"
+import { validateRequest } from "./oas-wrapper-validate.js"
 
 
 function errorReport(text: string, nodeError: SyntaxNode, rowOffset: number = 0): {brief: string, doc: string} {
+    console.log("REQUEST HINTS")
     const textLines = text.split("\n")
     const errLineNo = nodeError.startPosition.row + 1
     const columnStart = nodeError.startPosition.column + 1
@@ -31,7 +33,48 @@ function errorReport(text: string, nodeError: SyntaxNode, rowOffset: number = 0)
     return {brief: tsErrorBrief, doc: report}
 }
 
-
+function followPathInJsonTree(path: Array<string|number>, rootNode: SyntaxNode): SyntaxNode {
+    let current = rootNode
+    for (let i = 0; i < path.length; i++) {
+        const p = path[i]
+        if (current.childCount === 0) {
+            console.error("Current node has no children")
+            return null as any
+        }
+        if (typeof p === "number") {
+            if (current.type !== "array" || current.namedChildCount <= p) {
+                console.error("Array index out of bounds or not an array:", current.type, "at index", p)
+                return null as any
+            }
+            current = current.namedChildren[p]
+        }
+        else if (typeof p === "string") {
+            if (current.type !== "object") {
+                console.warn("Not an object:", current.type)
+                return null as any
+            }
+            const pair = current.namedChildren.find((child) => child.type === "pair" && child.firstNamedChild?.firstNamedChild?.text === p)
+            if (pair === undefined) {
+                console.warn("Key not found", current.type, current.namedChildren.map((child) => child.firstNamedChild?.firstNamedChild?.text))
+                return null as any
+            }
+            if (i === path.length - 1) {
+                const key = pair.firstChild
+                if (key === null) {
+                    console.error("Pair has no first child")
+                    return null as any
+                }
+                return key
+            }
+            if (pair.lastChild === null) {
+                console.error("Pair has no last child")
+                return null as any
+            }
+            current = pair.lastChild
+        }
+    }
+    return current
+}
 
 export async function requestHints(text: string, ctx: OasContext): Promise<Hint[]> {
     const trees = await parser.parse(text)
@@ -45,17 +88,17 @@ export async function requestHints(text: string, ctx: OasContext): Promise<Hint[
     const hints: Hint[] = []
 
     for (let node of errors(successors(trees.http.rootNode))) {
-        let endIndex = node.endIndex
-        if (node.startIndex === node.endIndex) {
-            endIndex += 1
-        }
-        hints.push({
-            name: "HTTP syntax error",
-            begin: node.startIndex,
-            end: endIndex,
-            type: HintType.ERROR,
-            ...errorReport(trees.httpText, node)
-        })
+      let endIndex = node.endIndex;
+      if (node.startIndex === node.endIndex) {
+        endIndex += 1;
+      }
+      hints.push({
+        name: "HTTP syntax error",
+        begin: node.startIndex,
+        end: endIndex,
+        type: HintType.ERROR,
+        ...errorReport(trees.httpText, node),
+      });
     }
     for (let node of errors(successors(trees.json.rootNode))) {
         let endIndex = node.endIndex
@@ -71,5 +114,22 @@ export async function requestHints(text: string, ctx: OasContext): Promise<Hint[
         })
     }
 
+    if (hints.length > 0) {
+        return hints
+    }
+
+    const validationResult = validateRequest({method: "POST", path: '/Brand/list', headers: []}, trees.jsonText, ctx)
+    console.log({validationResult})
+    const topNode = trees.json.rootNode.namedChildren[0]
+    for (let res of validationResult) {
+        hints.push({
+            name: "Validation error",
+            begin: res.atPath.length === 0 ? trees.jsonBegin : followPathInJsonTree(res.atPath, topNode)?.startIndex + trees.jsonBegin,
+            end: res.atPath.length === 0 ? trees.jsonBegin + trees.jsonText.length : followPathInJsonTree(res.atPath, topNode)?.endIndex + trees.jsonBegin,
+            type: HintType.ERROR,
+            brief: res.hint,
+            doc: ""
+        })
+    }
     return hints
 }

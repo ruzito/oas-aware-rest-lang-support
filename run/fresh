@@ -1,11 +1,12 @@
 #!/bin/bash
 set -euxo pipefail
 
-run/clean
+icmd=${1:-ci}
+
+run/clean "$icmd"
 
 run/.impl/start-local-npm
 
-icmd=${1:-ci}
 
 instFlags="--loglevel silent"
 instFlags="--loglevel silly"
@@ -17,8 +18,15 @@ then
 fi
 
 # Independent layer
-(cd backend && npm $icmd $instFlags && npm run build && npm publish)
-run/.impl/remove-local-integrity-hash
+if [[ "$icmd" = "offline" ]]
+then
+    icmd=ci
+    (cd backend && npm $icmd $instFlags && npm run build-skip-grammar && npm publish)
+    run/.impl/remove-local-integrity-hash
+else
+    (cd backend && npm $icmd $instFlags && npm run build && npm publish)
+    run/.impl/remove-local-integrity-hash
+fi
 
 # Frontend layer
 (cd frontend_codemirror && npm $icmd $instFlags && npm run build && npm publish)

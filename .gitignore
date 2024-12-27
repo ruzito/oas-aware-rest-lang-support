@@ -2,6 +2,7 @@ node_modules/
 dist/
 build/
 codegen/
+codegen.copy/
 /verdaccio/storage/
 .env
 **/*.log
