@@ -55,13 +55,13 @@ export async function traverseAsync(
     async function recurse(obj: unknown, path: Path) {
         if (Array.isArray(obj)) {
             for (const i of obj.keys()) {
-                recurse(obj[i], path.concat(i));
+                await recurse(obj[i], path.concat(i));
             }
         } else if (typeof obj === 'object' && obj !== null) {
             const castObj: PlainObject = obj as PlainObject
             for (const key in obj) {
                 if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                    recurse(castObj[key], path.concat(key));
+                    await recurse(castObj[key], path.concat(key));
                 }
             }
         }
@@ -69,7 +69,7 @@ export async function traverseAsync(
             await callback(path, obj as Scalar)
         }
     }
-    recurse(obj, [])
+    await recurse(obj, [])
 }
 
 export function accessByPath(obj: any, path: Path): any {

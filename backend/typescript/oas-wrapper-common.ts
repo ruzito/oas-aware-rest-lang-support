@@ -22,8 +22,10 @@ function matchPath(
 ): { matches: boolean; parameters: PlainObject } {
   const oasParts = oasPath.split("/");
   const httpParts = httpPath.split("/");
-  if (oasParts.length !== httpParts.length)
+  if (oasParts.length !== httpParts.length) {
+    // console.log("- Path lengths don't match", oasParts, httpParts);
     return { matches: false, parameters: {} };
+  }
 
   let parameters: PlainObject = {};
   for (let i = 0; i < oasParts.length; i++) {
@@ -32,6 +34,7 @@ function matchPath(
     if (op.startsWith("{")) {
       parameters[op.slice(1, -1)] = hp;
     } else if (op !== hp) {
+      // console.log("- Path parts don't match");
       return { matches: false, parameters: {} };
     }
   }
@@ -44,27 +47,32 @@ export function findSchema(
   ctx: OasContext
 ): SchemaObject | undefined {
   const oas = ctx.root;
-  if (!oas || !oas.paths) return undefined;
+  if (!oas || !oas.paths) {
+    console.warn("No paths in OAS");
+    return undefined;
+  }
 
   const m = method.toLowerCase();
 
   // Try direct match first (if the user provided a path that directly matches)
   if (oas.paths[httpPath] && oas.paths[httpPath][m]) {
-    return oas.paths[httpPath][m].requestBody?.content?.["application/json"]
+    return oas.paths[httpPath][m]?.requestBody?.content?.["application/json"]
       ?.schema;
   }
 
   // Try parameterized match
   for (const candidatePath of Object.keys(oas.paths)) {
+    // console.log("Trying candidate path", candidatePath, httpPath);
     const { matches, parameters } = matchPath(candidatePath, httpPath);
     if (matches) {
       const op =
-        oas.paths[candidatePath][m].requestBody?.content?.["application/json"]
+        oas.paths[candidatePath][m]?.requestBody?.content?.["application/json"]
           ?.schema;
       if (op) return op;
     }
   }
 
+  console.warn("No paths matched in OAS");
   return undefined;
 }
 
@@ -77,7 +85,12 @@ export function isObject(obj: SchemaObject): boolean {
 }
 
 export function isArray(obj: SchemaObject): boolean {
-  return "type" in obj && obj.type === "array";
+  const hasTypeArray = "type" in obj && obj.type === "array";
+  const hasItems = (!("type" in obj)) && "items" in obj;
+  if (hasItems && !("type" in obj)) {
+    console.warn("Array schema without type (schema has property `items` but no `type` property is specified):", {schemaObject: obj});
+  }
+  return hasTypeArray || hasItems;
 }
 
 export function isAllOf(obj: SchemaObject): boolean {

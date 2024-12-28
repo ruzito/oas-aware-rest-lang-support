@@ -191,4 +191,8 @@ describe("jpath", async () => {
         {path: [0], tail: {kind: 'objectKey', hint: "d", range: {beginOffset: 5, endOffset: 8}}}
         // {path: [0], tail: {kind: 'objectKey', hint: "", range: {beginOffset: 2, endOffset: 2}}}
     )
+
+    run(`[{ "d|" }]`,
+        {path: [0], tail: {kind: 'objectKey', hint: "d", range: {beginOffset: 3, endOffset: 6}}}
+    )
 })

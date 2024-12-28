@@ -87,7 +87,8 @@ export function validateRequest(
   json: string,
   ctx: OasContext
 ): Error[] {
-  const requestBodySchemaObject = findSchema(httpData.method, httpData.path, ctx);
+  const { method, path: httpPath } = httpData;
+  const requestBodySchemaObject = findSchema(method, httpPath, ctx);
   if (!requestBodySchemaObject) {
     console.warn("No schema found for request body");
     return [];

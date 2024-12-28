@@ -3,10 +3,6 @@ import assert from "node:assert/strict";
 
 import * as be from "@local/oas-ls-backend";
 
-async function setOAS(oas) {
-    await be.loadOAS(oas)
-}
-
 describe(`backend`, () => {
     test("exports only needed", () => {
         assert.deepStrictEqual(Object.keys(be).sort(), ['CompletionType', 'HintType', 'fetchOas', 'parseOas', 'requestCompletions', 'requestDocs', 'requestHints', 'initOasContext'].sort())

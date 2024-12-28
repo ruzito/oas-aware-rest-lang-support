@@ -9,7 +9,7 @@ run/.impl/start-local-npm
 
 
 instFlags="--loglevel silent"
-instFlags="--loglevel silly"
+# instFlags="--loglevel silly"
 
 if [[ "$icmd" = "reinstall" ]]
 then

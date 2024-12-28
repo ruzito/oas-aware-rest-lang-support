@@ -24,15 +24,7 @@ module.exports = grammar({
         header_value: $ => /[^\n]*/,
         method: $ => /[a-zA-Z-]+/,
         version: $ => /[a-zA-Z-\.0-9/]+/,
-        path_part: $ => /[^/\s]+/,
-        root_path_part: $ => '/',
-        path: $ => seq(
-            choice(
-                seq(optional($.root_path_part), $.path_part, optional(seq('/', $.path_part)), optional('/')),
-                $.root_path_part
-            ),
-        ),
-
+        path: $ => /[^\s]+/,
         _http_top: $ => seq(
             $.method, repeat1(' '), $.path, repeat1(' '), $.version, '\n'
         ),

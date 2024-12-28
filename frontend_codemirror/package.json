@@ -2,7 +2,7 @@
   "name": "@local/oas-ls-codemirror",
   "version": "1.0.0",
   "description": "",
-  "main": "src/main.ts",
+  "main": "./build/main.js",
   "scripts": {
     "test": "node --test ./build/tests/*.js",
     "build-grammar": "lezer-generator src/http.grammar -o src/http_parser.ts",

@@ -7,8 +7,8 @@ import * as hints from "./hints.js"
 import { CompletionType, HintType, Markdown, Completion, Hint, OasContext } from "./types.js"
 
 export const initOasContext = specLoader.initOasContext
-export const parseOas = specLoader.loadOAS
-export const fetchOas = specLoader.loadURL
+export const parseOas = specLoader.loadOas
+export const fetchOas = specLoader.loadUrl
 
 export const requestDocs = mockApi.requestDocs
 export const requestCompletions = completions.requestCompletions

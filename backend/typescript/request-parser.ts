@@ -532,6 +532,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
       debug["prevIndex"] = i
       if (i === 0) {
         tail.kind = CompletionKind.OBJECT_KEY;
+        console.log("First", {debug, tail, i, ithPair, immContainerParent})
         setKeyHint(tail, ithPair)
         setKeyRange(tail, ithPair, offset)
         // console.log(">>>", tail.hint)

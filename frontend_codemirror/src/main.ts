@@ -155,20 +155,16 @@ export const parseOas = be.parseOas
 export const fetchOas = be.fetchOas
 export const initOasContext = be.initOasContext
 
-function buildHttpMeta(meta: HttpMeta): string {
+function buildHttpMeta(meta: HttpData): string {
   const headers = meta.headers.map((x) => { return `${x.key}: ${x.value}` }).join('\n')
   return `${meta.method} ${meta.path} HTTP/1.1\n${headers}\n\n---\n\n`
 }
 
-function bodyOnlyHints(diagnostics: Diagnostic[]): Diagnostic[] {
-  return diagnostics.filter((d)=>{return d.from >= metaStorage.length}).map((d) => { d.from -= metaStorage.length; d.to -= metaStorage.length; return d })
+function bodyOnlyHints(diagnostics: Diagnostic[], httpPart: string): Diagnostic[] {
+  return diagnostics.filter((d)=>{return d.from >= httpPart.length}).map((d) => { d.from -= httpPart.length; d.to -= httpPart.length; return d })
 }
 
-let metaStorage: string = buildHttpMeta({ method: "GET", path: "/", headers: [{ key: "Content-Type", value: "application/json" }] })
-
-export function setHttp(meta: HttpMeta) {
-  throw "TODO"
-}
+// let metaStorage: string = buildHttpMeta({ method: "GET", path: "/", headers: [{ key: "Content-Type", value: "application/json" }] })
 
 function linterWrapper() {
   let view_ : EditorView | null = null
@@ -238,24 +234,26 @@ function linterWrapper() {
   return {createLinterPlugin, startLinting, stopLinting}
 }
 
-type HttpMeta = { method: string, path: string, headers: Array<{ key: string, value: string }> }
-export function json(ctx: be.OasContext) {
+export type HttpData = { method: string, path: string, headers: Array<{ key: string, value: string }> }
+export function json(ctx: be.OasContext, metaProvider: () => Promise<HttpData>) {
   // let wrapper = linterWrapper()
   let ext = [
     hoverTooltip(
       async (view, pos) => {
-        return await requestTooltip(ctx, metaStorage + view.state.doc.toString(), pos + metaStorage.length)
+        const httpPart = buildHttpMeta(await metaProvider());
+        return await requestTooltip(ctx, httpPart + view.state.doc.toString(), pos + httpPart.length)
       }
     ),
     autocompletion({
       override: [
         async (context: CompletionContext) => {
+          const httpPart = buildHttpMeta(await metaProvider());
           const { state, pos, explicit } = context;
-          let completions = await requestCompletion(ctx, metaStorage + state.doc.toString(), pos + metaStorage.length, metaStorage.length)
+          let completions = await requestCompletion(ctx, httpPart + state.doc.toString(), pos + httpPart.length, httpPart.length)
           if (completions !== null) {
-            completions.from -= metaStorage.length
+            completions.from -= httpPart.length
             if (completions.to !== null && completions.to !== undefined) {
-              completions.to -= metaStorage.length
+              completions.to -= httpPart.length
             }
           }
           return completions
@@ -267,8 +265,9 @@ export function json(ctx: be.OasContext) {
     //   return bodyOnlyHints(hints)
     // }),
     linter(async (view) => {
-      let hints = await requestHints(ctx, metaStorage + view.state.doc.toString())
-      return bodyOnlyHints(hints)
+      const httpPart = buildHttpMeta(await metaProvider());
+      let hints = await requestHints(ctx, httpPart + view.state.doc.toString())
+      return bodyOnlyHints(hints, httpPart)
     })
   ];
   return [ext, jsonExtension()]

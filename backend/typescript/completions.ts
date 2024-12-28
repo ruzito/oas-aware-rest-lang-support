@@ -6,16 +6,18 @@ import { exposeDebug, reversed, reduce } from "./utils.js"
 import { SyntaxNode, Tree } from "web-tree-sitter"
 import { JPath, HttpData } from "./types.js"
 import { getObjectKeys, oasFollowPath } from "./oas-wrapper.js"
+import { parseHttpData } from "./http-parts.js"
+import { Fzf } from "fzf";
 
 async function requestJsonCompletions(tree: Tree, offset: number, httpData: HttpData, ctx: OasContext): Promise<Completion[]> {
     console.log("Requesting JSON Completions")
     const jpath = await parser.getJPath(tree, offset)
     console.log({jpath})
     const oasAtPath = oasFollowPath(jpath.path, httpData, ctx)
-
+    let comps: Completion[] = []
     // First attempt:
     if (jpath.tail.kind === "objectKey") {
-        return getObjectKeys(oasAtPath, ctx).flatMap((key) => {
+        comps = getObjectKeys(oasAtPath, ctx).flatMap((key) => {
             return key.schemas.map((schema: any) => {
                 const desc = (schema as any)?.description
                 return {
@@ -30,9 +32,21 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
             })
         });
     }
-    // TODO: filter the options based on hint
-    // TODO: prepare replace action
-    return []
+    else {
+        console.warn("Not implemented")
+    }
+    if (jpath.tail.hint !== "") {
+        comps = new Fzf(comps, {
+            // With selector you tell FZF where it can find
+            // the string that you want to query on
+            selector: (item) => item.name,
+        }).find(jpath.tail.hint).map((entry) => {
+            const it = entry.item
+            // it.name = `${it.name} : ${entry.score}`
+            return it
+        });
+    }
+    return comps
     // return [
     //     { name: jpath.path.toString(), begin: offset, end: offset, result: "", type: CompletionType.DUMMY_TYPE, brief: JSON.stringify(jpath.tail), doc: "" }
     // ]
@@ -63,28 +77,7 @@ export async function requestCompletions(text: string, offset: number, ctx: OasC
 
     const httpOffset = (offset >= trees.jsonBegin) ? null : offset
     const jsonOffset = (offset >= trees.jsonBegin) ? offset - trees.jsonBegin : null
-
-    type header = {key: string, val: string, txt: string}
-    let method: string | null = null
-    let path: string | null = null
-    let headers: Array<header> = []
-    for (let node of named(children(trees.http.rootNode))) {
-        if (method === null && node.type === "method") {
-            method = node.text
-        }
-        if (path === null && node.type === "path") {
-            path = node.text
-        }
-        if (node.type === "header") {
-            const hdr: header = {
-                txt: node.text,
-                key: named(children(node), "header_key").next().value?.text ?? "",
-                val: named(children(node), "header_value").next().value?.text ?? ""
-            }
-            headers.push(hdr)
-        }
-    }
-
+    const {method, path, headers} = parseHttpData(trees.http)
     if (jsonOffset !== null) {
         const comps = await requestJsonCompletions(trees.json, jsonOffset, {method: method ?? "GET", path: path ?? "/", headers}, ctx)
         let newComps = comps.map(addOffset(trees.jsonBegin))

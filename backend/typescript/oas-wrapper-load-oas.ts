@@ -16,6 +16,7 @@ export function initOasContext(): OasContext {
 }
 
 async function parseOAS(spec: string, format: OASFormat): Promise<OasSpec> {
+  // console.log("Parsing OAS", { spec, format });
   let pojo: util.PlainObject = {};
   let tryList = [(x: string) => JSON.parse(x), (x: string) => parseYAML(x)];
   if (format === OASFormat.YAML) {
@@ -46,6 +47,7 @@ async function fetchOAS(url: string, ctx: OasContext): Promise<OasSpec | null> {
 
   // fetch spec
   try {
+    // console.log("Fetching OAS from", url, {ctx});
     let response = await fetch(url);
     if (!response.ok) {
       console.warn(
@@ -63,6 +65,7 @@ async function fetchOAS(url: string, ctx: OasContext): Promise<OasSpec | null> {
     console.warn(`Could not fetch OAS (unkown error) from \`${url}\`\n${err}`);
     return null;
   }
+  // console.log("Fetched OAS from", url, {response});
 
   // Guess format
   let format = OASFormat.JSON;
@@ -83,6 +86,7 @@ async function fetchOAS(url: string, ctx: OasContext): Promise<OasSpec | null> {
 }
 
 async function dereferenceURLs(pojoOAS: OasSpec, ctx: OasContext) {
+  // console.log("Dereferencing URLs", { pojoOAS, ctx });
   await util.traverseAsync(
     pojoOAS,
     async (path: util.Path, url: util.Scalar) => {
@@ -98,7 +102,7 @@ async function dereferenceURLs(pojoOAS: OasSpec, ctx: OasContext) {
   );
 }
 
-export async function loadOAS(
+export async function loadOas(
   oas: string,
   format: OASFormat = OASFormat.JSON,
   ctx: OasContext
@@ -112,13 +116,13 @@ export async function loadOAS(
   console.log("Loaded OasContext", { ctx });
 }
 
-export async function loadURL(url: string, ctx: OasContext): Promise<void> {
+export async function loadUrl(url: string, ctx: OasContext): Promise<void> {
   const root = await fetchOAS(url, ctx);
   ctx.root = root;
   if (ctx.root === null) {
     throw new Error(`Could not fetch OAS specification \`${url}\``);
   }
-  console.log("Loaded OasContext from URL", { ctx });
+  console.log("Loaded OasContext from URL", { url, ctx });
 }
 
 export function ready(ctx: OasContext): boolean {

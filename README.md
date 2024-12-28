@@ -8,7 +8,8 @@ This repo is a monorepo for various npm packages to enable language support for 
 
 
 - `bash`
-- `npm`
+- `npm` (confirmed versions: 10.9.0)
+- `node` (confirmed versions: v22.11.0)
 - `docker`
    - without sudo
    - for local npm repo so I can publish and install locally
@@ -92,3 +93,9 @@ flowchart BT;
 OAS Keywords
 
 - Info Object - holds the docs - (label, brief, md)
+
+## Node version
+
+```
+node --version
+```

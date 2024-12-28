@@ -4,6 +4,7 @@ import { named, children, predecessors, debug, printTree, indexOf, errors, succe
 import { SyntaxNode, Tree } from "web-tree-sitter"
 import { HTTP_SEPARATOR, SEPARATOR_EXPLANATION } from "./constants.js"
 import { validateRequest } from "./oas-wrapper-validate.js"
+import { parseHttpData } from "./http-parts.js"
 
 
 function errorReport(text: string, nodeError: SyntaxNode, rowOffset: number = 0): {brief: string, doc: string} {
@@ -115,10 +116,11 @@ export async function requestHints(text: string, ctx: OasContext): Promise<Hint[
     }
 
     if (hints.length > 0) {
+        console.log({hints, trees})
         return hints
     }
-
-    const validationResult = validateRequest({method: "POST", path: '/Brand/list', headers: []}, trees.jsonText, ctx)
+    const httpData = parseHttpData(trees.http)
+    const validationResult = validateRequest(httpData, trees.jsonText, ctx)
     console.log({validationResult})
     const topNode = trees.json.rootNode.namedChildren[0]
     for (let res of validationResult) {

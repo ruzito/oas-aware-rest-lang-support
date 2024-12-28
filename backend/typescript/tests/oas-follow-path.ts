@@ -4,7 +4,7 @@ import fs from "node:fs"
 import util from "node:util"
 import {
   initOasContext,
-  loadOAS,
+  loadOas,
   oasFollowPath,
   getObjectKeys,
   OASFormat
@@ -214,7 +214,7 @@ function followTest(specObj: {[key: string]: string}, method: string, url: strin
         console.log("\n\n=== Running test: ", testName);
         const ctx = initOasContext();
         console.log("=== Load OAS");
-        await loadOAS(spec, OASFormat.YAML, ctx);
+        await loadOas(spec, OASFormat.YAML, ctx);
         console.log("=== Follow Path");
         const result = oasFollowPath(
           jpath,
