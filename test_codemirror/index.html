@@ -4,14 +4,77 @@
   <meta charset="UTF-8">
   <title>CodeMirror Language Support Test</title>
   <!-- <link rel="stylesheet" href="/src/style.css"> -->
+  <style>
+    body {font-family: Arial;}
+    
+    /* Style the tab */
+    .tabcontainer {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+    }
+    
+    /* Style the buttons inside the tab */
+    .tabcontainer button {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+      font-size: 17px;
+    }
+    
+    /* Change background color of buttons on hover */
+    .tabcontainer button:hover {
+      background-color: #ddd;
+    }
+    
+    /* Create an active/current tablink class */
+    .tabcontainer button.active {
+      background-color: #ccc;
+    }
+    
+    /* Style the tab content */
+    .tabcontent {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+  </style>
 </head>
 <body>
-  <input type="text" id="oas-url"><button id="oas-url-btn">Load</button><br>
-  <div id="editor"></div><br>
-  <h3>JSON only: (POST /Product/query)</h3><br>
-  <div id="editor2"></div><br>
-  <div id="editor-product-query"></div><br>
-  <div id="editor-locale-path"></div><br>
+  <h1>CodeMirror Language Support Example</h1>
+  <h2>Set Open API specification url:</h2>
+  <input type="text" value="https://demo.evitadb.io:5555/rest/evita" id="oas-url" style="width: 50em"><button id="oas-url-btn">Load</button><br>
+  <label id="oas-status">Status: Empty</label>
+  <h2>Example requests:</h2>
+  <div class="tabcontainer"></div>
+
+  <div class="tabcontent tabid-Brand--List">
+    <div id="editor"></div><br>
+  </div>
+  <div class="tabcontent tabid-JSON-Only">
+    <select id="req-method">
+      <option value="GET">GET</option>
+      <option value="POST" selected="selected">POST</option>
+      <option value="PATCH">PATCH</option>
+      <option value="PUT">PUT</option>
+      <option value="DELETE">DELETE</option>
+      <option value="OPTIONS">OPTIONS</option>
+      <option value="HEAD">HEAD</option>
+    </select>
+    <input type="text" id="req-url" value="/Brand/list"><br>
+    <div id="editor-json"></div><br>
+  </div>
+  <div class="tabcontent tabid-Product--Query">
+    <div id="editor-product-query"></div><br>
+  </div>
+  <div class="tabcontent tabid-Locale--Path--Parameter">
+    <div id="editor-locale-path"></div><br>
+  </div>
   <!-- <script type="module" src="/src/main.js"></script> -->
   <script src="src/main.ts" type="module" defer async></script>
 </body>

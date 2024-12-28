@@ -6,6 +6,8 @@ export type Hint = { name: string, begin: number, end: number, type: HintType, b
 
 export enum CompletionType {
     DUMMY_TYPE = "dummyType",
+    OBJECT_KEY = "object_key",
+    VALUE = "value",
 }
 export enum HintType {
     ERROR = "error",
@@ -32,7 +34,7 @@ export const CompletionKind = {
   UNKNOWN: "unknown"
 } as const;
 
-type CompletionKind = EnumObject<typeof CompletionKind>
+export type CompletionKind = EnumObject<typeof CompletionKind>
 
 export type JPathTail = { kind: CompletionKind, hint: string, range: {beginOffset: number, endOffset: number} };
 export type JPathBody = Array<string | number | undefined>;

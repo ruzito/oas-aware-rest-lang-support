@@ -67,9 +67,19 @@ function run(s: string, expected: any) {
     testJPathVariant(`[[{"hello": ${s}}]]`, {path: [0,0,'hello',...expected.path], tail: {kind: expected.tail.kind, hint: expected.tail.hint, range: {beginOffset: expected.tail.range.beginOffset+12, endOffset: expected.tail.range.endOffset+12}}})
 }
 
+function runSingle(s: string, expected: any) {
+    testJPathVariant(s, expected)
+}
+
 
 describe("jpath", async () => {
-    if (false) { // skip because: too much right now
+    if (false) { // skip reason: too much right now
+        // This one is an issue, because when you open a string
+        // you basically throw away the rest of the line
+        // (parse it as part of the string)
+        // and the parser goes brrrr
+        // and that's assuming the string does not allow multiple lines
+        // in which case you throw away the rest of the file
         run(`{"|}`, {path: [], tail: {kind: 'objectKey'}})
     }
 
@@ -83,26 +93,26 @@ describe("jpath", async () => {
         {path: [], tail: {kind: 'objectKey', hint: "key", range: {beginOffset: 1, endOffset: 6}}}
     )
     run(`{"key":| "value"}`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 8, endOffset: 15}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 15}}}
     )
     run(`{"key": | }`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 8, endOffset: 8}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 8}}}
     )
     run(`{"key": |}`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 8, endOffset: 8}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 8}}}
     )
     run(`{"key": "val|ue"}`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 8, endOffset: 15}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 15}}}
     )
     run(`{"key": "val|ue", "anotherKey": "anotherValue"}`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 8, endOffset: 15}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 15}}}
     )
     run(`{"key": "value"|, "anotherKey": "anotherValue"}`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 8, endOffset: 15}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 15}}}
         // {path: [], tail: {kind: 'objectKeyPrependComma', hint: "", range: {beginOffset: 15, endOffset: 15}}}
     )
     run(`{"key": "value"  |  , "anotherKey": "anotherValue"}`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 8, endOffset: 15}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 15}}}
         // {path: [], tail: {kind: 'objectKeyPrependComma', hint: "", range: {beginOffset: 15, endOffset: 17}}}
     )
     run(`{"key": "value",| "anotherKey": "anotherValue"}`,
@@ -139,24 +149,24 @@ describe("jpath", async () => {
         {path: [], tail: {kind: 'objectKey', hint: "anotherKey", range: {beginOffset: 17, endOffset: 29}}}
     )
     run(`{"key": "value", "anotherKey":| "anotherValue"}`,
-        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 31, endOffset: 45}}}
+        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 31, endOffset: 45}}}
     )
     run(`{"key": "value", "anotherKey": "anotherValue|"}`,
-        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 31, endOffset: 45}}}
+        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 31, endOffset: 45}}}
     )
     run(`{"key": "value", "anotherKey": "anotherValue"|}`,
-        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 31, endOffset: 45}}}
+        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 31, endOffset: 45}}}
     )
     run(`{"key": "value", "anotherKey": "anotherValue"|  }`,
-        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 31, endOffset: 45}}}
+        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 31, endOffset: 45}}}
         // {path: [], tail: {kind: 'objectKeyPrependComma', hint: "", range: {beginOffset: 45, endOffset: 45}}}
     )
     run(`{"key": "value", "anotherKey": "anotherValue" |}`,
-        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 31, endOffset: 45}}}
+        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 31, endOffset: 45}}}
         // {path: [], tail: {kind: 'objectKeyPrependComma', hint: "", range: {beginOffset: 45, endOffset: 45}}}
     )
     run(`{"key": "value", "anotherKey": "anotherValue"  |  }`,
-        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 31, endOffset: 45}}}
+        {path: ['anotherKey'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 31, endOffset: 45}}}
         // {path: [], tail: {kind: 'objectKeyPrependComma', hint: "", range: {beginOffset: 45, endOffset: 45}}}
     )
     run(`{"key": "value", "anotherKey": "anotherValue",|}`,
@@ -172,16 +182,16 @@ describe("jpath", async () => {
         {path: [], tail: {kind: 'objectKey', hint: "", range: {beginOffset: 48, endOffset: 48}}}
     )
     run(`{"key":| , "anotherKey": "anotherValue"}`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 7, endOffset: 7}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 7, endOffset: 7}}}
     )
     run(`{"key": |, "anotherKey": "anotherValue"}`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 8, endOffset: 8}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 8}}}
     )
     run(`{"key": | , "anotherKey": "anotherValue"}`,
-        {path: ['key'], tail: {kind: 'objectValue', hint: "TODO: Value hint", range: {beginOffset: 8, endOffset: 8}}}
+        {path: ['key'], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 8}}}
     )
     run(`[|{"d": "x"}]`,
-        {path: [], tail: {kind: 'arrayElement', hint: "TODO: Value hint", range: {beginOffset: 1, endOffset: 1}}}
+        {path: [0], tail: {kind: 'arrayElement', hint: "", range: {beginOffset: 1, endOffset: 1}}}
     )
     run(`[{|"d": "x"}]`,
         {path: [0], tail: {kind: 'objectKey', hint: "d", range: {beginOffset: 2, endOffset: 5}}}
@@ -194,5 +204,29 @@ describe("jpath", async () => {
 
     run(`[{ "d|" }]`,
         {path: [0], tail: {kind: 'objectKey', hint: "d", range: {beginOffset: 3, endOffset: 6}}}
+    )
+    run(`[{ "d": | }]`,
+        {path: [0, "d"], tail: {kind: 'objectValue', hint: "", range: {beginOffset: 8, endOffset: 8}}}
+    )
+    run(`[{ "d": [|] }]`,
+        {path: [0, "d", 0], tail: {kind: 'arrayElement', hint: "", range: {beginOffset: 9, endOffset: 9}}}
+    )
+    run(`[{ "d": [[|]] }]`,
+        {path: [0, "d", 0, 0], tail: {kind: 'arrayElement', hint: "", range: {beginOffset: 10, endOffset: 10}}}
+    )
+    run(`[{ "d": [  |  ] }]`,
+        {path: [0, "d", 0], tail: {kind: 'arrayElement', hint: "", range: {beginOffset: 11, endOffset: 11}}}
+    )
+    run(`[{ "d": [[  |  ]] }]`,
+        {path: [0, "d", 0, 0], tail: {kind: 'arrayElement', hint: "", range: {beginOffset: 12, endOffset: 12}}}
+    )
+    run(`{ lld| }`,
+        {path: [], tail: {kind: 'objectKey', hint: "lld", range: {beginOffset: 3, endOffset: 6}}}
+    )
+    run(`{ l|ld }`,
+        {path: [], tail: {kind: 'objectKey', hint: "lld", range: {beginOffset: 3, endOffset: 6}}}
+    )
+    runSingle(`|`,
+        {path: [], tail: {kind: 'root', hint: "", range: {beginOffset: 0, endOffset: 0}}}
     )
 })

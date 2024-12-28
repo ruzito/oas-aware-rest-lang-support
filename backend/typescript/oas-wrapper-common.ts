@@ -5,7 +5,7 @@ export type ObjectSchemaObject = {
   type: "object";
   properties: { [key: string]: SchemaObject };
 };
-export type ArraySchemaObject = { type: "array"; items: SchemaObject[] };
+export type ArraySchemaObject = { type: "array"; items: SchemaObject };
 export type PrimitiveSchemaObject = { type: string };
 export type AllOfSchemaObject = { allOf: SchemaObject[] };
 export type ReferenceSchemaObject = { $ref: string };

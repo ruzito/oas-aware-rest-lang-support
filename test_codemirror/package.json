@@ -13,12 +13,13 @@
   "dependencies": {
     "@codemirror/lang-json": "^6.0.0",
     "@lezer/generator": "^1.7.1",
-    "codemirror": "^6.0.1",
     "@local/oas-ls-codemirror": "1.0.0",
+    "codemirror": "^6.0.1",
     "vite-plugin-wasm": "^3.3.0"
   },
   "devDependencies": {
+    "typescript": "^5.5.4",
     "vite": "^5.4.8",
-    "typescript": "^5.5.4"
+    "vite-plugin-singlefile": "^2.1.0"
   }
 }

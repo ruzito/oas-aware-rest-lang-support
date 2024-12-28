@@ -226,6 +226,21 @@ type JPathDebug = JPath & { debug?: PlainObject };
 //   return indexOf(node, node.parent.namedChildren) === 0;
 // }
 
+function getNodeIndexIn(it: Iterable<SyntaxNode>, offset: number): number {
+  let i = 0;
+  for (const node of it) {
+    if (node.startIndex >= offset) {
+      return i;
+    }
+    if (node.startIndex > offset && node.endIndex < offset) {
+      console.warn("Dont know why would you want to be here")
+      return i;
+    }
+    i++;
+  }
+  return i;
+}
+
 function getPairIndexBasedOnOffset(obj: SyntaxNode, offset: number): number {
   if (obj.type !== "object") {
     console.error("Unreachable 3");
@@ -237,18 +252,44 @@ function getPairIndexBasedOnOffset(obj: SyntaxNode, offset: number): number {
   // 0 1 1   2   3   4   5 <---- and I still care here
   // |aaa|bbb|ccc|ddd|eee|
 
-  let i = 0;
-  for (const pair of named(children(obj), "pair")) {
-    if (pair.startIndex >= offset) {
-      return i;
-    }
-    if (pair.startIndex > offset && pair.endIndex < offset) {
-      console.warn("Dont know why would you want to be here")
-      return i;
-    }
-    i++;
+  // let i = 0;
+  // for (const pair of named(children(obj), "pair")) {
+  //   if (pair.startIndex >= offset) {
+  //     return i;
+  //   }
+  //   if (pair.startIndex > offset && pair.endIndex < offset) {
+  //     console.warn("Dont know why would you want to be here")
+  //     return i;
+  //   }
+  //   i++;
+  // }
+  // return i;
+  return getNodeIndexIn(named(children(obj), "pair"), offset);
+}
+
+function getArrayIndexBasedOnOffset(arr: SyntaxNode, offset: number): number {
+  if (arr.type !== "array") {
+    console.error("Unreachable 3");
   }
-  return i;
+
+  //   ,-- Don't care about previous colon here
+  //  |   ,-- I do care here tho
+  // v   v
+  // 0 1 1   2   3   4   5 <---- and I still care here
+  // |aaa|bbb|ccc|ddd|eee|
+
+  // let i = 0;
+  // for (const item of named(children(arr))) {
+  //   if (item.startIndex >= offset) {
+  //     return i;
+  //   }
+  //   if (item.startIndex > offset && item.endIndex < offset) {
+  //     console.warn("Dont know why would you want to be here")
+  //     return i;
+  //   }
+  //   i++;
+  // }
+  return getNodeIndexIn(named(children(arr)), offset);
 }
 
 async function previousPairHasEnded(
@@ -321,14 +362,40 @@ function getCapture(matches: QueryMatch[], capturename: string) : SyntaxNode | u
   return undefined
 }
 
+function unrollStringContent(node: SyntaxNode): string {
+  if (node.type === "string") {
+    const child = node.namedChild(0);
+    if (child === null) {
+      return "";
+    }
+    else {
+      return unrollStringContent(child);
+    }
+  }
+  if (node.type === "string_content") {
+    return node.text;
+  }
+  return "";
+}
+
+// BEWARE: modification of this function is best done by TDD
+// `GIT_WORKTREE/backend/typescript/tests/jpath.ts` is the place to go
 export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
   const debug: PlainObject = {};
+  //    ^^^^^
+  // this is there to help you locate the place
+  // where value was assigned when the result did not match the wanted value
+  // and to print some basic information about the state of the data
+  // it is not used in the assertion of the result, so you can modify it as you need
+  // but it is recommended that the "why" is unique for each leaf of this if/else tree
+
   console.log("Constructing JPATH");
   // This should get us the named node directly at cursor (the most nested one)
   const node = jsonTree.rootNode.namedDescendantForIndex(offset);
+
   debug["nodeAtIndex"] = node;
   let hint: string = "";
-  // Now I want to figure out what container is directly above me
+  // Now I want to figure out what *container* is directly above me
   let immContainerParent: SyntaxNode | null;
   {
     const excludeSelf = offset <= node.startIndex;
@@ -448,11 +515,29 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
   }
 
   // I am very sorry, but I could not figure out
-  // how to do it better without exhausting all the possibilities
+  // how to do it better and finish in time
   if (immContainerParent.type === "object") {
     const p = named(predecessors(node, true), ["pair", "object"]).next();
+    const e = named(predecessors(node, true), "ERROR").next();
 
-    if (!p.done && p.value.type === "pair") {
+    debug["p.done"] = p.done;
+
+    // oboNode is "off by one" node, node that is touching the cursor from the left
+    const oboNode = jsonTree.rootNode.namedDescendantForIndex(offset - 1);
+    const oboNodeIsErrorWithoutChildren = oboNode.type === "ERROR" && oboNode.childCount === 0;
+    const nodeIsImmContainer = node.id === immContainerParent.id;
+    if (!p.done && nodeIsImmContainer && oboNodeIsErrorWithoutChildren) {
+      tail.hint = oboNode.text;
+      tail.range = {
+        beginOffset: oboNode.startIndex,
+        endOffset: oboNode.endIndex
+      }
+      tail.kind = CompletionKind.OBJECT_KEY;
+      debug["why"] = "ERROR - pair with key but no separator";
+      debug["offByOneNode"] = oboNode;
+      debug["why"] = "ERROR - error node is touching cursor from the left";
+    }
+    else if (!p.done && p.value.type === "pair") {
       // we are inside of pair `p`
       if (p.value.hasError) {
         // possibly do something else
@@ -514,7 +599,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
         // request completion of object value
         // and add the key to the path
         tail.kind = CompletionKind.OBJECT_VALUE;
-        tail.hint = "TODO: Value hint"
+        tail.hint = ""
         debug["why"] = "Right";
         setValueRange(tail, p.value, offset);
         const k = p.value.childForFieldName("key");
@@ -524,6 +609,24 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
           const kstr = k.namedChild(0);
           jpath.push(kstr === null ? undefined : kstr.text);
         }
+      }
+    } else if (!e.done && e.value.type === "ERROR") {
+      // we are at the root of the object
+      const guesses = e.value.namedChildren;
+      if (guesses.length === 1) {
+        const guess = guesses[0];
+        const key = unrollStringContent(guess);
+        tail.hint = key;
+        tail.range = {
+          beginOffset: guess.startIndex,
+          endOffset: guess.endIndex
+        }
+        tail.kind = CompletionKind.OBJECT_KEY;
+        debug["why"] = "ERROR - pair with key but no separator";
+        debug["guess"] = guess;
+      }
+      else {
+        debug["why"] = "ERROR - other";
       }
     } else {
       // we are in between pairs
@@ -535,7 +638,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
         console.log("First", {debug, tail, i, ithPair, immContainerParent})
         setKeyHint(tail, ithPair)
         setKeyRange(tail, ithPair, offset)
-        // console.log(">>>", tail.hint)
+        console.log(">>>", {immCont: immContainerParent, nodeAtIndex: node})
         debug["why"] = "First";
       } else {
         // check previous pair if we still need to complete that one
@@ -549,7 +652,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
         ) {
           // we are completing last pairs value
           tail.kind = CompletionKind.OBJECT_VALUE;
-          tail.hint = "TODO: Value hint"
+          tail.hint = ""
           const prePair = immContainerParent.namedChild(i - 1) as SyntaxNode;
           const k = prePair.childForFieldName("key");
           if (k === null) {
@@ -569,8 +672,15 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
     }
   } else if (immContainerParent.type === "array") {
     tail.kind = CompletionKind.ARRAY_ELEMENT;
-    tail.hint = "TODO: Value hint"
-    debug["why"] = "immArray";
+    tail.hint = ""
+    if (immContainerParent.parent) {
+      debug["why"] = "immArray";
+      const i = getArrayIndexBasedOnOffset(immContainerParent, offset);
+      jpath.push(i);
+    }
+    else {
+      debug["why"] = "immParentlessArray";
+    }
   } else {
     debug["why"] = "WTF";
   }

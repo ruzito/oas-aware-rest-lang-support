@@ -46,19 +46,14 @@ function followKey(
         return [];
       }
     } else if (isArray(obj)) {
-      // console.log("followKey array");
+      console.log("followKey array");
       if (typeof key === "string") {
-        // console.log("followKey array[string]");
+        console.log("followKey array[string]");
         return [];
       }
       const a = obj as ArraySchemaObject;
-      if (key < a.items.length) {
-        // console.log("followKey array[number]");
-        return [a.items[key]];
-      } else {
-        // console.log("followKey array[number] not found");
-        return [];
-      }
+      console.log("followKey array[number]");
+      return [a.items];
     } else if (isAllOf(obj)) {
       const allof = obj as AllOfSchemaObject;
       // console.log("followKey allof");
@@ -75,7 +70,7 @@ function followKey(
       // console.log("followKey oneof");
       return followKey(allof.oneOf, key, ctx);
     }
-    // console.log("followKey unknown");
+    console.log("followKey unknown");
     return [];
   });
 }
@@ -132,8 +127,8 @@ export function oasFollowPath(
 }
 
 type OasKeySpecRaw = {
-  name: string;
-  schema: SchemaObject;
+  name: string,
+  schema: SchemaObject,
 };
 function getObjectKeysRaw(
   arr: SchemaObject[],
@@ -184,5 +179,44 @@ export function getObjectKeys(
   return getObjectKeysRaw(arr, ctx).map((o) => {
     return { name: o.name, schemas: unrollOne(o.schema, ctx) };
   });
+}
+
+type OasValueSpecRaw = {
+  name: string,
+  schema: SchemaObject,
+};
+export function getObjectType(
+  arr: SchemaObject[],
+  ctx: OasContext
+): OasValueSpecRaw[] {
+  if (!Array.isArray(arr)) {
+    return [];
+  }
+  let types: OasValueSpecRaw[] = [];
+  for (const obj of arr) {
+    if (isObject(obj)) {
+      types.push({ name: "object", schema: obj });
+    } else if (isReference(obj)) {
+      types.push(
+        ...getObjectType(
+          followReference((obj as ReferenceSchemaObject).$ref, ctx),
+          ctx
+        )
+      );
+    } else if (isArray(obj)) {
+      types.push({name: "array", schema: obj});
+    } else if (isAllOf(obj)) {
+      types.push(...getObjectType((obj as AllOfSchemaObject).allOf, ctx));
+    } else if (isAnyOf(obj)) {
+      types.push(...getObjectType((obj as any).anyOf, ctx));
+    } else if (isOneOf(obj)) {
+      types.push(...getObjectType((obj as any).oneOf, ctx));
+    } else if (isPrimitive(obj)) {
+      types.push({ name: (obj as any).type, schema: obj });
+    } else {
+      // do nothing
+    }
+  }
+  return types;
 }
 

@@ -8,7 +8,13 @@ import { parseHttpData } from "./http-parts.js"
 
 
 function errorReport(text: string, nodeError: SyntaxNode, rowOffset: number = 0): {brief: string, doc: string} {
-    console.log("REQUEST HINTS")
+    // Currently the error message for syntax errors is not very helpful
+    // since it's just a JSON it is actually less confusing
+    // to just underline the error.
+    //
+    // Hence:
+    return {brief: "", doc: ""}
+
     const textLines = text.split("\n")
     const errLineNo = nodeError.startPosition.row + 1
     const columnStart = nodeError.startPosition.column + 1

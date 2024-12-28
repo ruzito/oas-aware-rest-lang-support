@@ -1,4 +1,4 @@
-import { CompletionType, Markdown, Completion, OasContext, OasSpec } from "./types.js"
+import { CompletionType, Markdown, Completion, OasContext, OasSpec, CompletionKind } from "./types.js"
 import * as parser from "./request-parser.js"
 import { named, children, predecessors, debug, printTree, indexOf } from "./treesitter-wrapper.js"
 import { HTTP_SEPARATOR, SEPARATOR_EXPLANATION } from "./constants.js"
@@ -8,6 +8,12 @@ import { JPath, HttpData } from "./types.js"
 import { getObjectKeys, oasFollowPath } from "./oas-wrapper.js"
 import { parseHttpData } from "./http-parts.js"
 import { Fzf } from "fzf";
+import { getObjectType } from "./oas-wrapper-follow-path.js"
+import { SchemaObject } from "./oas-wrapper-common.js"
+
+function isValue(kind: CompletionKind): boolean {
+    return kind === CompletionKind.OBJECT_VALUE || kind === CompletionKind.ARRAY_ELEMENT || kind === CompletionKind.ROOT_VALUE
+}
 
 async function requestJsonCompletions(tree: Tree, offset: number, httpData: HttpData, ctx: OasContext): Promise<Completion[]> {
     console.log("Requesting JSON Completions")
@@ -16,14 +22,14 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
     const oasAtPath = oasFollowPath(jpath.path, httpData, ctx)
     let comps: Completion[] = []
     // First attempt:
-    if (jpath.tail.kind === "objectKey") {
+    if (jpath.tail.kind === CompletionKind.OBJECT_KEY) {
         comps = getObjectKeys(oasAtPath, ctx).flatMap((key) => {
             return key.schemas.map((schema: any) => {
                 const desc = (schema as any)?.description
                 return {
                     name: key.name,
                     result: `"${key.name}"`,
-                    type: CompletionType.DUMMY_TYPE,
+                    type: CompletionType.OBJECT_KEY,
                     begin: jpath.tail.range.beginOffset,
                     end: jpath.tail.range.endOffset,
                     brief: desc ? "" : key.name,
@@ -32,10 +38,59 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
             })
         });
     }
+    if (isValue(jpath.tail.kind)) {
+        const types = getObjectType(oasAtPath, ctx)
+        comps = types.flatMap((key) => {
+            const schema = key.schema as SchemaObject & {type: string}
+            const desc = (schema as any)?.description
+            let result: string = ""
+            if (schema.type === "object") {
+                result = "{}"
+            }
+            else if (schema.type === "array") {
+                result = "[]"
+            }
+            else if (("items" in schema) && !("type" in schema)) {
+                console.warn("schema object should have included `\"type\": \"array\"`", {schemaObject: schema})
+                result = "[]"
+            }
+            else if (schema.type === "string") {
+                result = `"some string"`
+            }
+            else if (schema.type === "number") {
+                result = "0"
+            }
+            else if (schema.type === "boolean") {
+                result = "false"
+            }
+            else {
+                result = `"PLACEHOLDER FOR: ${schema.type}"`
+            }
+            return {
+                name: key.name,
+                result,
+                type: CompletionType.VALUE,
+                begin: offset,
+                end: offset,
+                brief: desc ? "" : result,
+                doc: desc ?? ""
+            }
+        });
+        console.log("objectValue completions", {oasAtPath, types, comps})
+    }
     else {
         console.warn("Not implemented")
     }
-    if (jpath.tail.hint !== "") {
+    comps.sort((a, b) => {
+        if ( a.name < b.name ) {
+          return -1;
+        }
+        if ( a.name > b.name ) {
+          return 1;
+        }
+        return 0;
+    });
+    if (jpath.tail.hint !== "" && !isValue(jpath.tail.kind)) {
         comps = new Fzf(comps, {
             // With selector you tell FZF where it can find
             // the string that you want to query on
