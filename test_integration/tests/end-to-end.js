@@ -307,6 +307,49 @@ describe("End-to-end tests", () => {
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 1);
     });
+    test("value completions for \"name\": |", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": |
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"some string\"");
+      assert.equal(comps[0].begin, offset);
+      assert.equal(comps[0].end, offset);
+    });
+    test("value completions for \"age\": |", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "age": |
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "0");
+      assert.equal(comps[0].begin, offset);
+      assert.equal(comps[0].end, offset);
+    });
+    test("value completions for root object", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        |
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "{}");
+      assert.equal(comps[0].begin, offset);
+      assert.equal(comps[0].end, offset);
+    });
     test("key completions for \"|\": {}", async () => {
       let {text, offset} = curs(dedent(`
         POST ${endpoint} HTTP/1.1
@@ -790,6 +833,51 @@ describe("End-to-end tests", () => {
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 4);
     })
+
+    test("value completions for nested object", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": "Alice",
+          "age": 20,
+          "parent": |,
+          "friends": [
+            {
+              "name": "Bob",
+              "age": 23
+            }
+          ]
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "{}");
+      assert.equal(comps[0].begin, offset);
+      assert.equal(comps[0].end, offset);
+    });
+    test("value completions for nested array", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": "Alice",
+          "age": 20,
+          "parent": {
+            "name": "Judy",
+            "age": 50
+          },
+          "friends": |
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "[]");
+      assert.equal(comps[0].begin, offset);
+      assert.equal(comps[0].end, offset);
+    });
   });
   describe("allof/anyof/oneof", () => {
     let ctx = null;
