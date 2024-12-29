@@ -28,20 +28,18 @@ async function getHttpData(): Promise<oasFrontend.HttpData> {
 }
 
 function setupEditorView(selector: string, jsonOnly: boolean, request: string) {
-  let cfg: EditorViewConfig | null = null
+  let ext: any = null
   if (jsonOnly === false) {
-    cfg = {
-      doc: request,
-      extensions: [basicSetup, oasFrontend.http(oasContext), syntaxHighlighting(myHighlightStyle), keymap.of([indentWithTab])],
-      parent: document.querySelector(selector) as HTMLElement,
-    }
+    ext = oasFrontend.http(oasContext)
   }
   else {
-    cfg = {
-      doc: request,
-      extensions: [basicSetup, oasFrontend.json(oasContext, getHttpData), syntaxHighlighting(myHighlightStyle), keymap.of([indentWithTab])],
-      parent: document.querySelector(selector) as HTMLElement,
-    }
+    ext = oasFrontend.json(oasContext, getHttpData)
+  }
+
+  const cfg: EditorViewConfig = {
+    doc: request,
+    extensions: [basicSetup, ext, syntaxHighlighting(myHighlightStyle), keymap.of([indentWithTab])],
+    parent: document.querySelector(selector) as HTMLElement,
   }
   let state: EditorState = EditorState.create(cfg)
   cfg.state = state
@@ -66,7 +64,7 @@ setupEditorView('#editor-json', true, `
   "a": {
      "b": {
        "c": [
-         {"d": }
+         {"d": {}}
        ]
      }
   },
@@ -93,7 +91,7 @@ Content-Type: application/json
 }
 `.trim())
 setupEditorView('#editor-locale-path', false, `
-POST /cz_CS/Tag/list HTTP/1.1
+POST /cs_CZ/Tag/list HTTP/1.1
 Host: example.com
 Content-Type: application/json
 

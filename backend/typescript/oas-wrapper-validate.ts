@@ -11,13 +11,26 @@ import {
 import * as util from './utils'
 
 import { Scalar, PlainObject } from "./utils";
+import { Key } from "readline";
 
-type Error = {
-  type: "keyError" | "formatError",
+type KeyError = {
+  type: "keyError",
+  atPath: Array<string | number>,
+  hint: string
+}
+
+type FormatError = {
+  type: "formatError",
   atPath: Array<string | number>,
   hint: string,
-  possibleTypes?: string[]
+  possibleTypes: string[]
 }
+
+type UrlError = {
+  type: "urlError"
+}
+
+type Error = KeyError | FormatError | UrlError
 
 const ARR = 0
 const OBJ = 1
@@ -28,16 +41,26 @@ const validatePath = (determinant: 0|1, urlSchema: SchemaObject, ctx: OasContext
     return [{atPath: path, type: "keyError", hint: "Bad key"}]
   }
   const targetValue = (parentValue as any)[path[path.length - 1]]
+  const possibleTypesDuplicated = schemaResult.flatMap((schema) => unrollOne(schema, ctx)).flatMap((schema) => {
+    if ("type" in schema) {
+      return [schema["type"]]
+    }
+    else if (isArray(schema)) {
+      return ["array"]
+    }
+    return []
+  });
+  const possibleTypes = [...new Set(possibleTypesDuplicated)];
   if (Array.isArray(targetValue)) {
       if (!schemaResult.some((schema) => {return unrollOne(schema, ctx).some(isArray)})) {
         console.log("shouldn't have been an array", {path, schemaResult, parentValue, targetValue})
-        return [{atPath: path, type: "formatError", hint: "This value should have been an array"}]
+        return [{atPath: path, type: "formatError", hint: "This value should have been an array", possibleTypes}]
       }
   }
   else if (typeof targetValue === 'object' && targetValue !== null) {
       if (!schemaResult.some((schema) => {return unrollOne(schema, ctx).some(isObject)})) {
         console.log("shouldn't have been an object", {path, schemaResult, parentValue, targetValue})
-        return [{atPath: path, type: "formatError", hint: "This value should have been an object"}]
+        return [{atPath: path, type: "formatError", hint: "This value should have been an object", possibleTypes}]
       }
   }
   // if (determinant === ARR) {
@@ -153,7 +176,7 @@ export function validateRequest(
   const requestBodySchemaObject = findSchema(method, httpPath, ctx);
   if (!requestBodySchemaObject) {
     console.warn("No schema found for request body");
-    return [];
+    return [{type: "urlError", }];
   }
 
   const req = JSON.parse(json);

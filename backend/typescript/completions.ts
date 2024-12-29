@@ -18,8 +18,8 @@ function isValue(kind: CompletionKind): boolean {
 async function requestJsonCompletions(tree: Tree, offset: number, httpData: HttpData, ctx: OasContext): Promise<Completion[]> {
     console.log("Requesting JSON Completions")
     const jpath = await parser.getJPath(tree, offset)
-    console.log({jpath})
     const oasAtPath = oasFollowPath(jpath.path, httpData, ctx)
+    console.log({jpath, oasAtPath})
     let comps: Completion[] = []
     // First attempt:
     if (jpath.tail.kind === CompletionKind.OBJECT_KEY) {
@@ -37,8 +37,10 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
                 }
             })
         });
+
+        console.log({comps})
     }
-    if (isValue(jpath.tail.kind)) {
+    else if (isValue(jpath.tail.kind)) {
         const types = getObjectType(oasAtPath, ctx)
         comps = types.flatMap((key) => {
             const schema = key.schema as SchemaObject & {type: string}
@@ -79,7 +81,7 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
         console.log("objectValue completions", {oasAtPath, types, comps})
     }
     else {
-        console.warn("Not implemented")
+        console.warn("Not implemented", {kind: jpath.tail.kind})
     }
     comps.sort((a, b) => {
         if ( a.name < b.name ) {
@@ -90,8 +92,9 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
         }
         return 0;
     });
+    let fuzzy: Completion[] = []
     if (jpath.tail.hint !== "" && !isValue(jpath.tail.kind)) {
-        comps = new Fzf(comps, {
+        fuzzy = new Fzf(comps, {
             // With selector you tell FZF where it can find
             // the string that you want to query on
             selector: (item) => item.name,
@@ -100,6 +103,9 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
             // it.name = `${it.name} : ${entry.score}`
             return it
         });
+    }
+    if (fuzzy.length > 0) {
+        return fuzzy
     }
     return comps
     // return [

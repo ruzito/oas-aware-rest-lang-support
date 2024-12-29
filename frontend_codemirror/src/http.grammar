@@ -34,6 +34,6 @@ Body { line? ("\n"+ line)* }
     keyVal { ![:\n]+ }
 }
 
-@external propSource jsonHighlighting from "./highlight"
+@external propSource httpHighlighting from "./highlight"
 
 @skip {}

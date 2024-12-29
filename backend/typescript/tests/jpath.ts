@@ -221,10 +221,10 @@ describe("jpath", async () => {
         {path: [0, "d", 0, 0], tail: {kind: 'arrayElement', hint: "", range: {beginOffset: 12, endOffset: 12}}}
     )
     run(`{ lld| }`,
-        {path: [], tail: {kind: 'objectKey', hint: "lld", range: {beginOffset: 3, endOffset: 6}}}
+        {path: [], tail: {kind: 'objectKey', hint: "lld", range: {beginOffset: 2, endOffset: 5}}}
     )
     run(`{ l|ld }`,
-        {path: [], tail: {kind: 'objectKey', hint: "lld", range: {beginOffset: 3, endOffset: 6}}}
+        {path: [], tail: {kind: 'objectKey', hint: "lld", range: {beginOffset: 2, endOffset: 5}}}
     )
     runSingle(`|`,
         {path: [], tail: {kind: 'root', hint: "", range: {beginOffset: 0, endOffset: 0}}}

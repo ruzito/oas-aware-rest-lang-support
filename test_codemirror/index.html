@@ -49,15 +49,32 @@
   <h1>CodeMirror Language Support Example</h1>
   <h2>Set Open API specification url:</h2>
   <input type="text" value="https://demo.evitadb.io:5555/rest/evita" id="oas-url" style="width: 50em"><br>
-  <button id="oas-url-btn">Load</button><br>
+  <button id="oas-url-btn">Load</button>
+  <label>&nbsp;&nbsp;&nbsp;</label>
   <label id="oas-status">Status: Empty</label>
+  <p>
+    After loading OAS or changing the path and method using external widgets, codemirror (the text editor) needs some kind of text change event, to attempt another diagnostic pass.
+    Please write some whitespeces or any character in the editor to trigger the diagnostic pass.
+  </p>
   <h2>Example requests:</h2>
   <div class="tabcontainer"></div>
 
   <div class="tabcontent tabid-Brand--List">
     <div id="editor"></div><br>
   </div>
+  <div class="tabcontent tabid-Product--Query">
+    <p>
+      I guess you noticed the separating <code>---</code> between HTTP part and JSON part, the reason is that due to HTTP syntax being defined using whitespaces.<br>
+      Space between method, path and version, then newline, then headers on separate lines and then the biggest issue. The request body starts after a single empty line.<br>
+      It would be simple enough to write a parser for fully compliant HTTP request.<br>
+      But when writing a parser for incomplete HTTP request which is still being written, it would confuse very much.<br>
+      Especially when the user is in the middle of writing another header and would put a new line between some existing headers at which point all the colors disappear and everything becomes red.<br>
+      So, I decided to separate the HTTP part from the JSON part using a separator (regex: <code>/^---+$/</code>).
+    </p>
+    <div id="editor-product-query"></div><br>
+  </div>
   <div class="tabcontent tabid-JSON-Only">
+    <p>This is an example of using external widgets to specify the HTTP metadata, combined with example of key errors (please type something into the editor to trigger codemirrors diagnostic passes)</p>
     <select id="req-method">
       <option value="GET">GET</option>
       <option value="POST" selected="selected">POST</option>
@@ -70,10 +87,8 @@
     <input type="text" id="req-url" value="/Brand/list"><br>
     <div id="editor-json"></div><br>
   </div>
-  <div class="tabcontent tabid-Product--Query">
-    <div id="editor-product-query"></div><br>
-  </div>
   <div class="tabcontent tabid-Locale--Path--Parameter">
+    <p>This is an example of a path, which is defined using parameters in the OAS. Like: <pre>/{locale}/Tag/list</pre></p>
     <div id="editor-locale-path"></div><br>
   </div>
   <!-- <script type="module" src="/src/main.js"></script> -->

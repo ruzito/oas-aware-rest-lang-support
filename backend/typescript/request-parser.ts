@@ -498,7 +498,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
   // Let's do WET instead of DRY here ... I have a feeling, these might diverge in the future
   function setKeyRange(tail: Partial<JPathTail>, pair: SyntaxNode, fallbackOffset: number) {
     const capture = getCapture(runQuery(pair, pairInspect), "keynode")
-    const bruteforceKey = pair.firstNamedChild
+    const bruteforceKey = pair?.firstNamedChild
     if (capture) {
       console.log("Capture", capture)
       if (!capture.isMissing) {
@@ -643,7 +643,18 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
         debug["why"] = "ERROR - pair with key but no separator";
         debug["guess"] = guess;
       }
+      if (guesses.length === 0) {
+        tail.kind = CompletionKind.OBJECT_KEY;
+        debug["why"] = "ERROR - no guesses";
+        tail.hint = e.value.text;
+        tail.range = {
+          beginOffset: e.value.startIndex,
+          endOffset: e.value.endIndex
+        }
+      }
       else {
+        debug["guesses"] = guesses;
+        console.log(debug)
         debug["why"] = "ERROR - other";
       }
     } else {
@@ -705,6 +716,8 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
 
   if (tail.kind === undefined || tail.kind === null) {
     console.error("tail.kind is", tail.kind)
+
+    console.log({debug})
   }
 
   let result: JPathDebug = { path: jpath, tail: {kind: tail.kind ?? CompletionKind.UNKNOWN, hint: tail.hint ?? "", range: tail.range ?? {beginOffset: offset, endOffset: offset}}, debug };
