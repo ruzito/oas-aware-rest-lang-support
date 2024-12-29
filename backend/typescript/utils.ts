@@ -26,7 +26,7 @@ export function traverse(
 ): void {
     function recurse(obj: unknown, path: Path) {
         if (Array.isArray(obj)) {
-            console.log("traversing array", path)
+            // console.log("traversing array", path)
             if (obj.length === 0) {
                 leafCb(path, obj as Array<any>)
             }
@@ -36,7 +36,7 @@ export function traverse(
                 }
             }
         } else if (typeof obj === 'object' && obj !== null) {
-            console.log("traversing object", path)
+            // console.log("traversing object", path)
             const castObj: PlainObject = obj as PlainObject
             let empty = true
             for (const key in obj) {
@@ -64,7 +64,7 @@ export async function traverseAsync(
     callback: (path: Path, value: Scalar) => Promise<void>
 ): Promise<void> {
     async function recurse(obj: unknown, path: Path) {
-        if (Array.isArray(obj)) {
+        if (Array.isArray(obj) && obj !== null) {
             for (const i of obj.keys()) {
                 await recurse(obj[i], path.concat(i));
             }

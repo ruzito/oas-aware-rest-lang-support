@@ -68,7 +68,6 @@ function stub(expected, outOfOrder = false) {
     return stub_
 }
 
-
 const nestedPojo = {
     "null": null,
     "arr": [
@@ -105,8 +104,8 @@ async function traverseAsync(value, cb) {
 
 const params = [["traverse", traverse], ["traverseAsync", traverseAsync]]
 
-params.forEach((param) => describe(param[0], ()=>{
-    const trav = param[1]
+describe("traverseAsync", ()=>{
+    const trav = traverseAsync
     test("non object", async () => {
         let cb = stub([
             [[], null],
@@ -119,22 +118,22 @@ params.forEach((param) => describe(param[0], ()=>{
             [[], false],
             [[], true],
         ])
-        trav(null, cb); cb.verify(1)
-        trav(undefined, cb); cb.verify(1)
-        trav(0, cb); cb.verify(1)
-        trav(42, cb); cb.verify(1)
-        trav("", cb); cb.verify(1)
-        trav("63", cb); cb.verify(1)
-        trav("hello", cb); cb.verify(1)
-        trav(false, cb); cb.verify(1)
-        trav(true, cb); cb.verify(1)
+        await trav(null, cb); cb.verify(1)
+        await trav(undefined, cb); cb.verify(1)
+        await trav(0, cb); cb.verify(1)
+        await trav(42, cb); cb.verify(1)
+        await trav("", cb); cb.verify(1)
+        await trav("63", cb); cb.verify(1)
+        await trav("hello", cb); cb.verify(1)
+        await trav(false, cb); cb.verify(1)
+        await trav(true, cb); cb.verify(1)
         cb.verifyDone()
     })
     
     test("empty object", async () => {
         let cb = stub([]) // fail on call
-        trav({}, cb)
-        trav([], cb)
+        await trav({}, cb)
+        await trav([], cb)
     })
     
     test("simple object", async () => {
@@ -149,7 +148,7 @@ params.forEach((param) => describe(param[0], ()=>{
             [["false"], false],
             [["true"], true],
         ], true)
-        trav({
+        await trav({
             "null": null,
             "undefined": undefined,
             "0": 0,
@@ -175,11 +174,91 @@ params.forEach((param) => describe(param[0], ()=>{
             [["nested", "nested", "nested", "nested", "nested", "false"], false],
             [["nested", "nested", "nested", "nested", "nested", "nested", "true"], true],
         ], true)
-        trav(nestedPojo, cb)
+        await trav(nestedPojo, cb)
         cb.verifyDone()
     })
     
-}))
+})
+
+describe("traverse", ()=>{
+    const trav = traverse
+    test("non object", async () => {
+        let cb = stub([
+            [[], null],
+            [[], undefined],
+            [[], 0],
+            [[], 42],
+            [[], ""],
+            [[], "63"],
+            [[], "hello"],
+            [[], false],
+            [[], true],
+        ])
+        await trav(null, cb); cb.verify(1)
+        await trav(undefined, cb); cb.verify(1)
+        await trav(0, cb); cb.verify(1)
+        await trav(42, cb); cb.verify(1)
+        await trav("", cb); cb.verify(1)
+        await trav("63", cb); cb.verify(1)
+        await trav("hello", cb); cb.verify(1)
+        await trav(false, cb); cb.verify(1)
+        await trav(true, cb); cb.verify(1)
+        cb.verifyDone()
+    })
+    
+    test("empty object", async () => {
+        let cb = stub([
+            [[], {}],
+            [[], []]
+        ])
+        await trav({}, cb)
+        await trav([], cb)
+    })
+    
+    test("simple object", async () => {
+        let cb = stub([
+            [["null"], null],
+            [["undefined"], undefined],
+            [["0"], 0],
+            [["42"], 42],
+            [["emptyString"], ""],
+            [["63"], "63"],
+            [["hello"], "hello"],
+            [["false"], false],
+            [["true"], true],
+        ], true)
+        await trav({
+            "null": null,
+            "undefined": undefined,
+            "0": 0,
+            "42": 42,
+            "emptyString": "",
+            "63": "63",
+            "hello": "hello",
+            "false": false,
+            "true": true,
+        }, cb)
+        cb.verifyDone()
+    })
+    
+    test("nested object", async () => {
+        let cb = stub([
+            [["null"], null],
+            [["arr", 0, "undefined"], undefined],
+            [["arr", 1], 0],
+            [["nested", "42"], 42],
+            [["nested", "nested", "emptyString"], ""],
+            [["nested", "nested", "nested", "63"], "63"],
+            [["nested", "nested", "nested", "nested", "hello"], "hello"],
+            [["nested", "nested", "nested", "nested", "nested", "false"], false],
+            [["nested", "nested", "nested", "nested", "nested", "nested", "true"], true],
+        ], true)
+        await trav(nestedPojo, cb)
+        cb.verifyDone()
+    })
+    
+})
+
 test("index nested object", async () => {
     assertEq(
         util.accessByPath(nestedPojo, ["nested", "nested", "nested", "nested", "nested", "nested", "true"]),

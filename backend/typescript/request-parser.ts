@@ -389,7 +389,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
   // it is not used in the assertion of the result, so you can modify it as you need
   // but it is recommended that the "why" is unique for each leaf of this if/else tree
 
-  console.log("Constructing JPATH");
+  // console.log("Constructing JPATH");
   // This should get us the named node directly at cursor (the most nested one)
   const node = jsonTree.rootNode.namedDescendantForIndex(offset);
 
@@ -500,23 +500,23 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
     const capture = getCapture(runQuery(pair, pairInspect), "keynode")
     const bruteforceKey = pair?.firstNamedChild
     if (capture) {
-      console.log("Capture", capture)
+      // console.log("Capture", capture)
       if (!capture.isMissing) {
-        console.log("Capture is not missing")
+        // console.log("Capture is not missing")
         tail.range = {
           beginOffset: capture.startIndex,
           endOffset: capture.endIndex
         };
       }
       else if (bruteforceKey) {
-        console.log("Using bruteforce", bruteforceKey)
+        // console.log("Using bruteforce", bruteforceKey)
         tail.range = {
           beginOffset: bruteforceKey.startIndex,
           endOffset: bruteforceKey.endIndex
         }
       }
       else {
-        console.log("Else")
+        // console.log("Else")
         tail.range = {
           beginOffset: fallbackOffset,
           endOffset: fallbackOffset
@@ -524,7 +524,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
       }
     }
     else if (bruteforceKey) {
-      console.log("Using bruteforce", bruteforceKey)
+      // console.log("Using bruteforce", bruteforceKey)
       tail.range = {
         beginOffset: bruteforceKey.startIndex,
         endOffset: bruteforceKey.endIndex
@@ -654,7 +654,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
       }
       else {
         debug["guesses"] = guesses;
-        console.log(debug)
+        // console.log(debug)
         debug["why"] = "ERROR - other";
       }
     } else {
@@ -664,10 +664,10 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
       debug["prevIndex"] = i
       if (i === 0) {
         tail.kind = CompletionKind.OBJECT_KEY;
-        console.log("First", {debug, tail, i, ithPair, immContainerParent})
+        // console.log("First", {debug, tail, i, ithPair, immContainerParent})
         setKeyHint(tail, ithPair)
         setKeyRange(tail, ithPair, offset)
-        console.log(">>>", {immCont: immContainerParent, nodeAtIndex: node})
+        // console.log(">>>", {immCont: immContainerParent, nodeAtIndex: node})
         debug["why"] = "First";
       } else {
         // check previous pair if we still need to complete that one
@@ -715,9 +715,7 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
   }
 
   if (tail.kind === undefined || tail.kind === null) {
-    console.error("tail.kind is", tail.kind)
-
-    console.log({debug})
+    console.error("tail.kind is", tail.kind, {debug})
   }
 
   let result: JPathDebug = { path: jpath, tail: {kind: tail.kind ?? CompletionKind.UNKNOWN, hint: tail.hint ?? "", range: tail.range ?? {beginOffset: offset, endOffset: offset}}, debug };

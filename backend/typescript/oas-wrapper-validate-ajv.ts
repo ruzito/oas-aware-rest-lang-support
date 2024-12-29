@@ -48,7 +48,7 @@ export function validateRequest(
     }
   });
   const validationResult = requestValidator.validateRequest({body: JSON.parse(json)});
-  console.log({validationResult});
+  // console.log({validationResult});
   if (validationResult?.errors) {
     return validationResult.errors;
   }

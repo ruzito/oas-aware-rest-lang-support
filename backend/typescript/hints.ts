@@ -182,20 +182,20 @@ export async function requestHints(text: string, ctx: OasContext): Promise<Hint[
     }
 
     if (hints.length > 0) {
-        console.log({hints, trees})
+        // console.log({hints, trees})
         return hints
     }
 
     hints = checkAllObjectsForDuplicateKeys(trees.json.rootNode, trees.jsonBegin)
 
     if (hints.length > 0) {
-        console.log({hints, trees})
+        // console.log({hints, trees})
         return hints
     }
     
     const httpData = parseHttpData(trees.http)
     const validationResult = validateRequest(httpData, trees.jsonText, ctx)
-    console.log({validationResult})
+    // console.log({validationResult})
     const topNode = trees.json.rootNode.namedChildren[0]
     for (let res of validationResult) {
         if (res.type === "keyError") {

@@ -46,13 +46,13 @@ function followKey(
         return [];
       }
     } else if (isArray(obj)) {
-      console.log("followKey array");
+      // console.log("followKey array");
       if (typeof key === "string") {
-        console.log("followKey array[string]");
+        // console.log("followKey array[string]");
         return [];
       }
       const a = obj as ArraySchemaObject;
-      console.log("followKey array[number]");
+      // console.log("followKey array[number]");
       return [a.items];
     } else if (isAllOf(obj)) {
       const allof = obj as AllOfSchemaObject;
@@ -70,7 +70,7 @@ function followKey(
       // console.log("followKey oneof");
       return followKey(allof.oneOf, key, ctx);
     }
-    console.log("followKey unknown");
+    // console.log("followKey unknown");
     return [];
   });
 }

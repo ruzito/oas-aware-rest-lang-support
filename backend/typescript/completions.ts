@@ -16,10 +16,10 @@ function isValue(kind: CompletionKind): boolean {
 }
 
 async function requestJsonCompletions(tree: Tree, offset: number, httpData: HttpData, ctx: OasContext): Promise<Completion[]> {
-    console.log("Requesting JSON Completions")
+    // console.log("Requesting JSON Completions")
     const jpath = await parser.getJPath(tree, offset)
     const oasAtPath = oasFollowPath(jpath.path, httpData, ctx)
-    console.log({jpath, oasAtPath})
+    // console.log({jpath, oasAtPath})
     let comps: Completion[] = []
     // First attempt:
     if (jpath.tail.kind === CompletionKind.OBJECT_KEY) {
@@ -38,7 +38,7 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
             })
         });
 
-        console.log({comps})
+        // console.log({comps})
     }
     else if (isValue(jpath.tail.kind)) {
         const types = getObjectType(oasAtPath, ctx)
@@ -78,7 +78,7 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
                 doc: desc ?? ""
             }
         });
-        console.log("objectValue completions", {oasAtPath, types, comps})
+        // console.log("objectValue completions", {oasAtPath, types, comps})
     }
     else {
         console.warn("Not implemented", {kind: jpath.tail.kind})
