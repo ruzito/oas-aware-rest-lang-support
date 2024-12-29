@@ -13,7 +13,7 @@ function errorReport(text: string, nodeError: SyntaxNode, rowOffset: number = 0)
     // to just underline the error.
     //
     // Hence:
-    return {brief: "", doc: ""}
+    return {brief: "", doc: ""};
 
     const textLines = text.split("\n")
     const errLineNo = nodeError.startPosition.row + 1
@@ -27,7 +27,7 @@ function errorReport(text: string, nodeError: SyntaxNode, rowOffset: number = 0)
     report += `${padding_with_line_number}${'~'.repeat(cursorSize)}\n`
     
     let tsErrorBrief = nodeError.toString().slice(1, -1)
-    let error_message
+    let error_message = ""
     if (nodeError.isMissing) {
         error_message = `${nodeError.toString().slice(1, -1)}`
     }
