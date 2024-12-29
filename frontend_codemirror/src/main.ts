@@ -53,7 +53,7 @@ async function renderMD(md_str: string): Promise<HTMLElement> {
 }
 
 async function requestTooltip(ctx: be.OasContext, text: string, offset: number): Promise<Tooltip | null> {
-  // console.log({ request: "tooltip", text, offset })
+  return null // TODO: implement
   let docs = await be.requestDocs(text, offset, ctx)
   let dom = await renderMD(docs)
   return {
@@ -67,6 +67,10 @@ function mapCompletionType(t: be.CompletionType): string {
     case be.CompletionType.DUMMY_TYPE:
       console.warn(`Dummy completion type, fallback to "namespace"`)
       return "namespace"
+    case be.CompletionType.OBJECT_KEY:
+      return "property"
+    case be.CompletionType.VALUE:
+      return "type"
     default:
       console.warn(`Unknown completion type "${t}", fallback to "function"`)
       return "function"
@@ -98,9 +102,11 @@ async function requestCompletion(ctx: be.OasContext, text: string, offset: numbe
       apply: `${prefix}${comp.result}${suffix}`,
       type: mapCompletionType(comp.type)
     };
-    let node = await renderMD(comp.doc)
-    completion.info = (completion: Completion) => {
-      return { dom: node }
+    if (comp.doc && comp.doc !== "") {
+      let node = await renderMD(comp.doc)
+      completion.info = (completion: Completion) => {
+        return { dom: node }
+      }
     }
     return completion
   }))
@@ -139,7 +145,7 @@ async function requestHints(ctx: be.OasContext, text: string): Promise<Diagnosti
       source: "lsp",
       message: msg,
     }
-    if (hint.doc != "") {
+    if (hint.doc && hint.doc !== "") {
       let md = `${msg}\n\n${hint.doc}`.trim()
       let node = await renderMD(md)
       diag.renderMessage = (view: EditorView) => {
