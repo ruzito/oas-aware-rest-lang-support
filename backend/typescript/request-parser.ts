@@ -498,18 +498,36 @@ export async function getJPath(jsonTree: Tree, offset: number): Promise<JPath> {
   // Let's do WET instead of DRY here ... I have a feeling, these might diverge in the future
   function setKeyRange(tail: Partial<JPathTail>, pair: SyntaxNode, fallbackOffset: number) {
     const capture = getCapture(runQuery(pair, pairInspect), "keynode")
+    const bruteforceKey = pair.firstNamedChild
     if (capture) {
-      if (capture.isMissing) {
+      console.log("Capture", capture)
+      if (!capture.isMissing) {
+        console.log("Capture is not missing")
+        tail.range = {
+          beginOffset: capture.startIndex,
+          endOffset: capture.endIndex
+        };
+      }
+      else if (bruteforceKey) {
+        console.log("Using bruteforce", bruteforceKey)
+        tail.range = {
+          beginOffset: bruteforceKey.startIndex,
+          endOffset: bruteforceKey.endIndex
+        }
+      }
+      else {
+        console.log("Else")
         tail.range = {
           beginOffset: fallbackOffset,
           endOffset: fallbackOffset
         }
       }
-      else {
-        tail.range = {
-          beginOffset: capture.startIndex,
-          endOffset: capture.endIndex
-        };
+    }
+    else if (bruteforceKey) {
+      console.log("Using bruteforce", bruteforceKey)
+      tail.range = {
+        beginOffset: bruteforceKey.startIndex,
+        endOffset: bruteforceKey.endIndex
       }
     }
   }

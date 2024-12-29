@@ -16,19 +16,18 @@ import { parse } from "url";
 const logFile = fs.createWriteStream("console-output.end-to-end.log", {
   flags: "w",
 });
-const originalConsoleLog = console.log;
+// const originalConsoleLog = console.log;
 global.console.log = function (...args) {
-  logFile.write(util.format(...args) + "\n");
+  logFile.write(util.format(Date.now(), "[INFO]", ...args) + "\n");
   // originalConsoleLog(...args)
 };
 // const originalConsoleWarn = console.warn;
-// global.console.warn = function (...args) {
-//   logFile.write(util.format(...args) + "\n");
-//   // originalConsoleLog(...args)
-// };
+global.console.warn = function (...args) {
+  logFile.write(util.format(Date.now(), "[WARN]", ...args) + "\n");
+  // originalConsoleLog(...args)
+};
 
 const port = 5555;
-// const ip = "localhost";
 const ip = "127.0.0.1";
 
 
@@ -129,6 +128,7 @@ async function setOas(path) {
 }
 
 describe("Test Server", () => {
+  // Test for the test code :-D
   test("server running", async () => {
     const response = await fetch(`http://${ip}:${port}/`);
     assert.equal(response.status, 200);
@@ -172,42 +172,132 @@ describe("End-to-end tests", () => {
     });
     test("0 errors", async () => {
       let req = dedent(`
-              POST ${endpoint} HTTP/1.1
-              Content-Type: application/json
-              ---
-              {
-                "name": "John",
-                "age": 42
-              }
-          `);
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": "John",
+          "age": 42
+        }
+      `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 0);
     });
-    test("1 error", async () => {
+    test("empty key error", async () => {
       let req = dedent(`
-              POST ${endpoint} HTTP/1.1
-              Content-Type: application/json
-              ---
-              {
-                "naame": "John",
-                "age": 42
-              }
-          `);
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "": "John"
+        }
+      `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 1);
     });
-    test("2 errors", async () => {
+    test("1 key error", async () => {
       let req = dedent(`
-              POST ${endpoint} HTTP/1.1
-              Content-Type: application/json
-              ---
-              {
-                "naame": "John",
-                "aage": 42
-              }
-          `);
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "naame": "John",
+          "age": 42
+        }
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 1);
+    });
+    test("2 key errors", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "naame": "John",
+          "aage": 42
+        }
+      `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 2);
+    });
+    test("duplicate key errors", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": "John",
+          "name": "Doe"
+        }
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 2);
+    });
+    test("primitive wrong value errors", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": 42,
+          "age": "John"
+        }
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 2);
+    });
+    test("filled array wrong value error", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        [
+          {
+            "name": "John",
+            "age": 42
+          }
+        ]
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 1);
+    });
+    test("empty array wrong value error", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        [
+        ]
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 1);
+    });
+    test("filled object wrong value error", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": {
+            "first": "John"
+          }
+        }
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 1);
+    });
+    test("empty object wrong value error", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": {}
+        }
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 1);
     });
   });
   describe("one layer same source ref", () => {
@@ -240,40 +330,40 @@ describe("End-to-end tests", () => {
     });
     test("0 errors", async () => {
       let req = dedent(`
-              POST ${endpoint} HTTP/1.1
-              Content-Type: application/json
-              ---
-              {
-                "name": "John",
-                "age": 42
-              }
-          `);
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": "John",
+          "age": 42
+        }
+      `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 0);
     });
     test("1 error", async () => {
       let req = dedent(`
-              POST ${endpoint} HTTP/1.1
-              Content-Type: application/json
-              ---
-              {
-                "naame": "John",
-                "age": 42
-              }
-          `);
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "naame": "John",
+          "age": 42
+        }
+      `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 1);
     });
     test("2 errors", async () => {
       let req = dedent(`
-              POST ${endpoint} HTTP/1.1
-              Content-Type: application/json
-              ---
-              {
-                "naame": "John",
-                "aage": 42
-              }
-          `);
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "naame": "John",
+          "aage": 42
+        }
+      `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 2);
     });
@@ -309,56 +399,315 @@ describe("End-to-end tests", () => {
     });
     test("0 errors", async () => {
       let req = dedent(`
-              POST ${endpoint} HTTP/1.1
-              Content-Type: application/json
-              ---
-              {
-                "name": "John",
-                "age": 42
-              }
-          `);
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": "John",
+          "age": 42
+        }
+      `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 0);
     });
     test("1 error", async () => {
       let req = dedent(`
-              POST ${endpoint} HTTP/1.1
-              Content-Type: application/json
-              ---
-              {
-                "naame": "John",
-                "age": 42
-              }
-          `);
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "naame": "John",
+          "age": 42
+        }
+      `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 1);
     });
     test("2 errors", async () => {
       let req = dedent(`
-              POST ${endpoint} HTTP/1.1
-              Content-Type: application/json
-              ---
-              {
-                "naame": "John",
-                "aage": 42
-              }
-          `);
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "naame": "John",
+          "aage": 42
+        }
+      `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 2);
     });
   });
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
-  //   test("", async () => {});
+  describe("recursive ref", () => {
+    let ctx = null;
+    let endpoint = "/users";
+    let method = "POST";
+    beforeEach(async () => {
+      let apiLocation = "/api";
+      specs[apiLocation] = specObject(
+        method.toLowerCase(), // method
+        endpoint, // path
+        {
+          // body
+          requestBody: requestBody({
+            $ref: `#/components/schemas/User`,
+          }),
+        },
+        {
+          // schemas
+          User: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              age: { type: "number" },
+              parent: { $ref: "#/components/schemas/User" },
+              friends: { type: "array", items: { $ref: "#/components/schemas/User" } },
+
+              // broken oas, but for the sake of this work
+              // I assume that if type is missing and items is present,
+              // it is an array
+              enemies: { items: { $ref: "#/components/schemas/User" } },
+            },
+          },
+        }
+      );
+      ctx = await setOas(apiLocation);
+    });
+
+    test("0 errors", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": "Alice",
+          "age": 20,
+          "parent": {
+            "name": "Judy",
+            "age": 50
+          },
+          "friends": [
+            {
+              "name": "Bob",
+              "age": 23
+            }
+          ],
+          "enemies": [
+            {
+              "name": "Craig",
+              "age": 30,
+              "enemies": [
+                {
+                  "name": "Alice"
+                },
+                {
+                  "name": "Bob"
+                },
+                {
+                  "name": "Judy"
+                }
+              ]
+            }
+          ]
+        }
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 0);
+    })
+
+    test("wrong types", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": "Alice",
+          "age": "20",
+          "parent": {
+            "name": "Judy",
+            "age": "50"
+          },
+          "friends": [
+            {
+              "name": "Bob",
+              "age": "23"
+            }
+          ],
+          "enemies": [
+            {
+              "name": "Craig",
+              "age": "30",
+              "enemies": [
+                {
+                  "name": 0
+                },
+                {
+                  "name": 1
+                },
+                {
+                  "name": 2
+                }
+              ]
+            }
+          ]
+        }
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 7);
+    })
+
+    test("too much keys", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "name": "Alice",
+          "age": 20,
+          "hat": "white",
+          "parent": {
+            "name": "Judy",
+            "age": 50,
+            "hat": "red"
+          },
+          "friends": [
+            {
+              "name": "Bob",
+              "age": 23,
+              "hat": "gray"
+            }
+          ],
+          "enemies": [
+            {
+              "name": "Craig",
+              "age": 30,
+              "hat": "black",
+              "enemies": [
+                {
+                  "name": "Alice"
+                },
+                {
+                  "name": "Bob"
+                },
+                {
+                  "name": "Judy"
+                }
+              ]
+            }
+          ]
+        }
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 4);
+    })
+  });
+  describe("allof/anyof/oneof", () => {
+    let ctx = null;
+    let endpoint = "/users";
+    let method = "POST";
+    beforeEach(async () => {
+      let apiLocation = "/api";
+      specs[apiLocation] = specObject(
+        method.toLowerCase(), // method
+        endpoint, // path
+        {
+          // body
+          requestBody: requestBody({
+            type: "object",
+            properties: {
+              allOf: {
+                allOf: [
+                  { $ref: "#/components/schemas/User" },
+                  { $ref: "#/components/schemas/Employee" },
+                  { $ref: "#/components/schemas/Roomba" },
+                ]
+              },
+              anyOf: {
+                anyOf: [
+                  { $ref: "#/components/schemas/User" },
+                  { $ref: "#/components/schemas/Employee" },
+                  { $ref: "#/components/schemas/Roomba" },
+                ]
+              },
+              oneOf: {
+                oneOf: [
+                  { $ref: "#/components/schemas/User" },
+                  { $ref: "#/components/schemas/Employee" },
+                  { $ref: "#/components/schemas/Roomba" },
+                ]
+              },
+            },
+          }),
+        },
+        {
+          // schemas
+          User: {
+            type: "object",
+            properties: {
+              fingerprintCookie: { type: "string" },
+              creditScore: { type: "number" },
+            },
+          },
+          Employee: {
+            type: "object",
+            properties: {
+              linesOfCodePerWeek: { type: "number" },
+              salary: { type: "number" },
+            },
+          },
+          Roomba: {
+            type: "object",
+            properties: {
+              petName: { type: "string" },
+              favouriteDock: { type: "string" },
+              emojiBumperSticker: { type: "string" },
+              nextMaintenanceScheduleTimestamp: { type: "number" },
+            },
+          },
+        }
+      );
+      ctx = await setOas(apiLocation);
+    });
+
+    test("0 errors", async () => {
+      let req = dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "allOf": {
+            "fingerprintCookie": "abc",
+            "creditScore": 800,
+            "linesOfCodePerWeek": 1000,
+            "salary": 100000,
+            "petName": "R2D2",
+            "favouriteDock": "kitchen",
+            "emojiBumperSticker": "🤖",
+            "nextMaintenanceScheduleTimestamp": 1630000000
+          },
+          "anyOf": {
+            "fingerprintCookie": "abc",
+            "creditScore": 800,
+            "linesOfCodePerWeek": 1000,
+            "salary": 100000,
+            "petName": "R2D2",
+            "favouriteDock": "kitchen",
+            "emojiBumperSticker": "🤖",
+            "nextMaintenanceScheduleTimestamp": 1630000000
+          },
+          "oneOf": {
+            "fingerprintCookie": "abc",
+            "creditScore": 800,
+            "linesOfCodePerWeek": 1000,
+            "salary": 100000,
+            "petName": "R2D2",
+            "favouriteDock": "kitchen",
+            "emojiBumperSticker": "🤖",
+            "nextMaintenanceScheduleTimestamp": 1630000000
+          }
+        }
+      `);
+      let hints = await be.requestHints(req, ctx);
+      assert.equal(hints.length, 0);
+    });
+  });
 });

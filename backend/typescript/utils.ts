@@ -20,25 +20,36 @@ export function isPlainObject(obj: unknown): boolean {
 
 export function traverse(
     obj: unknown,
-    leafCb: (path: Path, value: Scalar) => void,
+    leafCb: (path: Path, value: Scalar | PlainObject | Array<any>) => void,
     shouldNestObjectPred: (path: Path, parentObject: PlainObject) => boolean = () => true,
     shouldNestArrayPred: (path: Path, parentArray: Array<any>) => boolean = () => true,
 ): void {
     function recurse(obj: unknown, path: Path) {
         if (Array.isArray(obj)) {
+            console.log("traversing array", path)
+            if (obj.length === 0) {
+                leafCb(path, obj as Array<any>)
+            }
             for (const i of obj.keys()) {
                 if (shouldNestArrayPred(path.concat(i), obj)) {
                     recurse(obj[i], path.concat(i));
                 }
             }
         } else if (typeof obj === 'object' && obj !== null) {
+            console.log("traversing object", path)
             const castObj: PlainObject = obj as PlainObject
+            let empty = true
             for (const key in obj) {
+                empty = false
                 if (Object.prototype.hasOwnProperty.call(obj, key)) {
                     if (shouldNestObjectPred(path.concat(key), castObj)) {
+                        
                         recurse(castObj[key], path.concat(key));
                     }
                 }
+            }
+            if (empty) {
+                leafCb(path, obj as PlainObject)
             }
         }
         else {

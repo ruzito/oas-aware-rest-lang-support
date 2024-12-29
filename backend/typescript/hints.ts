@@ -40,7 +40,7 @@ function errorReport(text: string, nodeError: SyntaxNode, rowOffset: number = 0)
     return {brief: tsErrorBrief, doc: report}
 }
 
-function followPathInJsonTree(path: Array<string|number>, rootNode: SyntaxNode): SyntaxNode {
+function followPathInJsonTree(path: Array<string|number>, rootNode: SyntaxNode, preferKey: boolean = true): SyntaxNode {
     let current = rootNode
     for (let i = 0; i < path.length; i++) {
         const p = path[i]
@@ -60,12 +60,16 @@ function followPathInJsonTree(path: Array<string|number>, rootNode: SyntaxNode):
                 console.warn("Not an object:", current.type)
                 return null as any
             }
-            const pair = current.namedChildren.find((child) => child.type === "pair" && child.firstNamedChild?.firstNamedChild?.text === p)
+            const pair = current.namedChildren.find((child) => {
+                if (child.type !== "pair") return false
+                if (p === "") return child.firstNamedChild?.text === "\"\""
+                return child.firstNamedChild?.firstNamedChild?.text === p
+            });
             if (pair === undefined) {
-                console.warn("Key not found", current.type, current.namedChildren.map((child) => child.firstNamedChild?.firstNamedChild?.text))
+                console.warn("Key not found", {current, pair, p})
                 return null as any
             }
-            if (i === path.length - 1) {
+            if (preferKey && i === path.length - 1) {
                 const key = pair.firstChild
                 if (key === null) {
                     console.error("Pair has no first child")
@@ -83,6 +87,62 @@ function followPathInJsonTree(path: Array<string|number>, rootNode: SyntaxNode):
     return current
 }
 
+function validateDuplicateKeys(node: SyntaxNode): Array<SyntaxNode> {
+    if (node.type !== "object") {
+        return []
+    }
+    const keys = new Map<string, SyntaxNode[]>()
+
+    for (let pair of node.namedChildren) {
+        let key = pair.firstNamedChild?.firstNamedChild?.text
+        const quotedKey = pair.firstNamedChild?.text
+        if (key === undefined) {
+            if (quotedKey === "\"\"") {
+                key = ""
+            }
+            else {
+                console.error("Pair has no key", {pair})
+                continue
+            }
+        }
+        if (!keys.has(key)) {
+            keys.set(key, [])
+        }
+        // We know key is present in keys due to previous check
+        // We know pair has a first child due to the type check and key === undefined check
+        (keys.get(key) as SyntaxNode[]).push(pair.firstNamedChild as SyntaxNode)
+    }
+    const duplicates = Array.from(keys.entries())
+        .filter(([_, v]) => v.length > 1)
+        .flatMap(([_, v]) => v);
+    return duplicates;
+    // return []
+}
+
+function checkAllObjectsForDuplicateKeys(
+    node: SyntaxNode,
+    offset: number = 0
+): Hint[] {
+    let hints: Hint[] = []
+    if (node.type === "object") {
+        const duplicates = validateDuplicateKeys(node);
+        for (const d of duplicates) {
+            hints.push({
+                name: "Duplicate key",
+                begin: d.startIndex + offset,
+                end: d.endIndex + offset,
+                type: HintType.ERROR,
+                brief: `Duplicate key ${d.text}`,
+                doc: "",
+            });
+        }
+    }
+    for (const child of node.namedChildren) {
+        hints = hints.concat(checkAllObjectsForDuplicateKeys(child, offset));
+    }
+    return hints
+}
+
 export async function requestHints(text: string, ctx: OasContext): Promise<Hint[]> {
     const trees = await parser.parse(text)
 
@@ -92,7 +152,7 @@ export async function requestHints(text: string, ctx: OasContext): Promise<Hint[
         ]
     }
 
-    const hints: Hint[] = []
+    let hints: Hint[] = []
 
     for (let node of errors(successors(trees.http.rootNode))) {
       let endIndex = node.endIndex;
@@ -125,19 +185,45 @@ export async function requestHints(text: string, ctx: OasContext): Promise<Hint[
         console.log({hints, trees})
         return hints
     }
+
+    hints = checkAllObjectsForDuplicateKeys(trees.json.rootNode, trees.jsonBegin)
+
+    if (hints.length > 0) {
+        console.log({hints, trees})
+        return hints
+    }
+    
     const httpData = parseHttpData(trees.http)
     const validationResult = validateRequest(httpData, trees.jsonText, ctx)
     console.log({validationResult})
     const topNode = trees.json.rootNode.namedChildren[0]
     for (let res of validationResult) {
-        hints.push({
-            name: "Validation error",
-            begin: res.atPath.length === 0 ? trees.jsonBegin : followPathInJsonTree(res.atPath, topNode)?.startIndex + trees.jsonBegin,
-            end: res.atPath.length === 0 ? trees.jsonBegin + trees.jsonText.length : followPathInJsonTree(res.atPath, topNode)?.endIndex + trees.jsonBegin,
-            type: HintType.ERROR,
-            brief: res.hint,
-            doc: ""
-        })
+        if (res.type === "keyError") {
+            const node = followPathInJsonTree(res.atPath, topNode)
+            hints.push({
+                name: "Key error",
+                begin: res.atPath.length === 0 ? trees.jsonBegin : node?.startIndex + trees.jsonBegin,
+                end: res.atPath.length === 0 ? trees.jsonBegin + trees.jsonText.length : node?.endIndex + trees.jsonBegin,
+                type: HintType.ERROR,
+                brief: res.hint,
+                doc: ""
+            })
+        }
+        else if (res.type === "formatError") {
+            const node = followPathInJsonTree(res.atPath, topNode, false)
+            let doc = ""
+            if (res.possibleTypes) {
+                doc = "Possible types:\n" + res.possibleTypes.map((type) => `- \`${type}\``).join("\n")
+            }
+            hints.push({
+                name: "Value error",
+                begin: res.atPath.length === 0 ? trees.jsonBegin : node?.startIndex + trees.jsonBegin,
+                end: res.atPath.length === 0 ? trees.jsonBegin + trees.jsonText.length : node?.endIndex + trees.jsonBegin,
+                type: HintType.ERROR,
+                brief: res.hint,
+                doc
+            })
+        }
     }
     return hints
 }

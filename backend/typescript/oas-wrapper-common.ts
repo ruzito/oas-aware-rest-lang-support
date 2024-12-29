@@ -1,4 +1,5 @@
-import { OasContext } from "./types";
+import { Schema } from "yaml";
+import { OasContext, OasSpec } from "./types";
 import { PlainObject } from "./utils";
 
 export type ObjectSchemaObject = {
@@ -130,10 +131,14 @@ export function unrollOne(obj: SchemaObject, ctx: OasContext): SchemaObject[] {
 }
 
 export function followReference(ref: string, ctx: OasContext): SchemaObject[] {
-  return unrollOne(resolveRef(ref, ctx), ctx);
+  const res = resolveRef(ref, ctx) as (SchemaObject | null);
+  if (res) {
+    return unrollOne(resolveRef(ref, ctx) as SchemaObject, ctx);
+  }
+  return []
 }
 
-export function resolveRef(ref: string, ctx: OasContext): any {
+export function resolveRef(ref: string, ctx: OasContext): SchemaObject | null {
   const [urlPart, hashPart] = ref.split("#");
   let doc = ctx.root;
 
@@ -147,9 +152,9 @@ export function resolveRef(ref: string, ctx: OasContext): any {
   if (hashPart) {
     const segments = hashPart.replace(/^\/+/, "").split("/");
     for (const seg of segments) {
-      if (doc == null) return undefined;
+      if (doc == null) return null;
       doc = (doc as any)[seg];
     }
   }
-  return doc;
+  return doc as SchemaObject; // Lets assume that the reference is always to a schema object
 }

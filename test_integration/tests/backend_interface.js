@@ -9,7 +9,11 @@ describe(`backend`, () => {
     })
     describe("exports enum", () => {
         test("CompletionType", () => {
-            assert.deepStrictEqual(be.CompletionType, { DUMMY_TYPE: "dummyType" })
+            assert.deepStrictEqual(be.CompletionType, {
+                DUMMY_TYPE: "dummyType",
+                OBJECT_KEY: "object_key",
+                VALUE: "value"
+            })
         })
         test("HintType", () => {
             assert.deepStrictEqual(be.HintType, { ERROR: 'error', WARNING: 'warning', INFO: 'info' })
