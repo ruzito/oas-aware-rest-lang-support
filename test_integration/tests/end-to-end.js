@@ -121,6 +121,14 @@ function dedent(str) {
   return newLines.join("\n");
 }
 
+function curs(s, cursor = '|') {
+  const offset = s.indexOf(cursor)
+  assert.equal(typeof offset, "number")
+  const text = s.slice(0, offset) + s.slice(offset + 1);
+  assert.equal(typeof text, "string")
+  return {text, offset}
+}
+
 async function setOas(path) {
   let ctx = be.initOasContext();
   await be.fetchOas(`http://${ip}:${port}${path}`, ctx);
@@ -298,6 +306,189 @@ describe("End-to-end tests", () => {
       `);
       let hints = await be.requestHints(req, ctx);
       assert.equal(hints.length, 1);
+    });
+    test("key completions for \"|\": {}", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "|": {}
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 2);
+      assert.equal(comps[0].result, "\"age\"");
+      assert.equal(comps[0].begin, offset - 1);
+      assert.equal(comps[0].end, offset + 1);
+      assert.equal(comps[1].result, "\"name\"");
+    });
+    test("key completions for \"n|\": {}", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "n|": {}
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"name\"");
+      assert.equal(comps[0].begin, offset - 2);
+      assert.equal(comps[0].end, offset + 1);
+    });
+    test("key completions for \"n|a\": {}", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "n|a": {}
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"name\"");
+      assert.equal(comps[0].begin, offset - 2);
+      assert.equal(comps[0].end, offset + 2);
+    });
+    test("key completions for \"|na\": {}", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "|na": {}
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"name\"");
+      assert.equal(comps[0].begin, offset - 1);
+      assert.equal(comps[0].end, offset + 3);
+    });
+    test("key completions for \"|\"", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "|"
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 2);
+      assert.equal(comps[0].result, "\"age\"");
+      assert.equal(comps[0].begin, offset - 1);
+      assert.equal(comps[0].end, offset + 1);
+      assert.equal(comps[1].result, "\"name\"");
+    });
+    test("key completions for \"n|\"", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "n|"
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"name\"");
+      assert.equal(comps[0].begin, offset - 2);
+      assert.equal(comps[0].end, offset + 1);
+    });
+    test("key completions for \"n|a\"", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "n|a"
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"name\"");
+      assert.equal(comps[0].begin, offset - 2);
+      assert.equal(comps[0].end, offset + 2);
+    });
+    test("key completions for \"|na\"", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          "|na"
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"name\"");
+      assert.equal(comps[0].begin, offset - 1);
+      assert.equal(comps[0].end, offset + 3);
+    });
+    test("key completions for |", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          |
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 2);
+      assert.equal(comps[0].result, "\"age\"");
+      assert.equal(comps[1].result, "\"name\"");
+      assert.equal(comps[0].begin, offset);
+      assert.equal(comps[0].end, offset);
+    });
+    test("key completions for n|", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          n|
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"name\"");
+      assert.equal(comps[0].begin, offset - 1);
+      assert.equal(comps[0].end, offset);
+    });
+    test("key completions for n|a", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          n|a
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"name\"");
+      assert.equal(comps[0].begin, offset - 1);
+      assert.equal(comps[0].end, offset + 1);
+    });
+    test("key completions for |na", async () => {
+      let {text, offset} = curs(dedent(`
+        POST ${endpoint} HTTP/1.1
+        Content-Type: application/json
+        ---
+        {
+          |na
+        }
+      `));
+      let comps = await be.requestCompletions(text, offset, ctx);
+      assert.equal(comps.length, 1);
+      assert.equal(comps[0].result, "\"name\"");
+      assert.equal(comps[0].begin, offset);
+      assert.equal(comps[0].end, offset + 2);
     });
   });
   describe("one layer same source ref", () => {
