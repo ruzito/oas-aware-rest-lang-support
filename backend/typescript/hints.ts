@@ -192,7 +192,7 @@ export async function requestHints(text: string, ctx: OasContext): Promise<Hint[
         // console.log({hints, trees})
         return hints
     }
-    
+
     const httpData = parseHttpData(trees.http)
     const validationResult = validateRequest(httpData, trees.jsonText, ctx)
     // console.log({validationResult})

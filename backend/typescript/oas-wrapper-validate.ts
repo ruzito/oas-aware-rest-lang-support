@@ -178,7 +178,12 @@ export function validateRequest(
     console.warn("No schema found for request body");
     return [{type: "urlError", }];
   }
-
-  const req = JSON.parse(json);
-  return validateJsonRequest(req, requestBodySchemaObject, ctx);
+  try {
+    const req = JSON.parse(json);
+    return validateJsonRequest(req, requestBodySchemaObject, ctx);
+  }
+  catch (err) {
+    console.warn("Invalid JSON", {json});
+    throw err
+  }
 }

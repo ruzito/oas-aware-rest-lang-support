@@ -42,23 +42,25 @@ function matchPath(
   return { matches: true, parameters };
 }
 
-export function findSchema(
-  method: string,
-  httpPath: string,
-  ctx: OasContext
-): SchemaObject | undefined {
+export function getPaths(ctx: OasContext): string[] {
+  const oas = ctx.root;
+  if (!oas || !oas.paths) {
+    console.warn("No paths in OAS");
+    return [];
+  }
+  return Object.keys(oas.paths);
+}
+
+export function findPath(httpPath: string, ctx: OasContext) {
   const oas = ctx.root;
   if (!oas || !oas.paths) {
     console.warn("No paths in OAS");
     return undefined;
   }
 
-  const m = method.toLowerCase();
-
   // Try direct match first (if the user provided a path that directly matches)
-  if (oas.paths[httpPath] && oas.paths[httpPath][m]) {
-    return oas.paths[httpPath][m]?.requestBody?.content?.["application/json"]
-      ?.schema;
+  if (oas.paths[httpPath]) {
+    return oas.paths[httpPath]
   }
 
   // Try parameterized match
@@ -67,14 +69,27 @@ export function findSchema(
     const { matches, parameters } = matchPath(candidatePath, httpPath);
     if (matches) {
       const op =
-        oas.paths[candidatePath][m]?.requestBody?.content?.["application/json"]
-          ?.schema;
+        oas.paths[candidatePath]
       if (op) return op;
     }
   }
 
   console.warn("No paths matched in OAS");
   return undefined;
+}
+
+export function findSchema(
+  method: string,
+  httpPath: string,
+  ctx: OasContext
+): SchemaObject | undefined {
+  const m = method.toLowerCase();
+
+  const p = findPath(httpPath, ctx);
+  if (!p) {
+    return undefined;
+  }
+  return p[m]?.requestBody?.content?.["application/json"]?.schema;
 }
 
 export function isReference(obj: SchemaObject): boolean {

@@ -8,6 +8,8 @@ export enum CompletionType {
     DUMMY_TYPE = "dummyType",
     OBJECT_KEY = "object_key",
     VALUE = "value",
+    PATH = "path",
+    METHOD = "method"
 }
 export enum HintType {
     ERROR = "error",

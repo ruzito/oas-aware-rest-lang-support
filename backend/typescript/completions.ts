@@ -9,7 +9,7 @@ import { getObjectKeys, oasFollowPath } from "./oas-wrapper.js"
 import { parseHttpData } from "./http-parts.js"
 import { Fzf } from "fzf";
 import { getObjectType } from "./oas-wrapper-follow-path.js"
-import { SchemaObject } from "./oas-wrapper-common.js"
+import { findPath, findSchema, getPaths, SchemaObject } from "./oas-wrapper-common.js"
 
 function isValue(kind: CompletionKind): boolean {
     return kind === CompletionKind.OBJECT_VALUE || kind === CompletionKind.ARRAY_ELEMENT || kind === CompletionKind.ROOT_VALUE
@@ -112,6 +112,107 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
     //     { name: jpath.path.toString(), begin: offset, end: offset, result: "", type: CompletionType.DUMMY_TYPE, brief: JSON.stringify(jpath.tail), doc: "" }
     // ]
 }
+
+async function requestHttpCompletions(tree: Tree, httpText: string, offset: number, httpData: HttpData, ctx: OasContext): Promise<Completion[]> {
+    const trimmedHttp = httpText.trimStart()
+    const beginOffset = httpText.length - trimmedHttp.length
+    let head = ""
+    let headers = []
+    trimmedHttp.split("\n").forEach((line, index) => {
+        if (index === 0) {
+            head = line
+        }
+        else {
+            headers.push(line)
+        }
+    });
+
+    let headData = head.split(" ")
+    if (headData.length !== 3) {
+        return []
+    }
+    let method = headData[0].toLowerCase()
+    let path = headData[1]
+
+    const oas = ctx.root;
+    if (!oas || !oas.paths) {
+        console.warn("No paths in OAS");
+        return [];
+    }
+
+    if (offset <= beginOffset + headData[0].length) {
+        const pathObj = findPath(path, ctx)
+        if (!pathObj) {
+            return []
+        }
+        else {
+            return Object.keys(pathObj).map((method) => {
+                return {
+                    name: method.toUpperCase(),
+                    result: method.toUpperCase(),
+                    type: CompletionType.METHOD,
+                    begin: beginOffset,
+                    end: beginOffset + headData[0].length,
+                    brief: "",
+                    doc: ""
+                }
+            })
+        }
+    }
+    else if (offset <= beginOffset + headData[0].length + 1 + headData[1].length) {
+        const pathParts = path.split("/")
+        const lastPart = pathParts[pathParts.length - 1]
+        const beginPart = pathParts.slice(0, pathParts.length - 1).join("/")
+        const candidates: string[] = []
+        getPaths(ctx).forEach((path) => {
+            if (path.startsWith(beginPart)) {
+                candidates.push(path)
+            }
+            // TODO: else if (partially matches with {parameters}) {...}
+        })
+        if (candidates.length === 0) {
+            return []
+        }
+        else {
+            let finalCandidates = candidates
+            if (lastPart === "") {
+                finalCandidates = candidates.sort()
+            }
+            else {
+                const fuzzy = new Fzf(candidates).find(lastPart).map((entry) => entry.item);
+                if (fuzzy.length > 0) {
+                    finalCandidates = fuzzy
+                }
+            }
+            return finalCandidates.map((path) => {
+                return {
+                    name: path,
+                    result: path,
+                    type: CompletionType.PATH,
+                    begin: beginOffset + headData[0].length + 1,
+                    end: beginOffset + headData[0].length + 1 + headData[1].length,
+                    brief: "",
+                    doc: ""
+                }
+            })
+        }
+    }
+    else if (offset < beginOffset + headData[0].length + 1 + headData[1].length + 1) {
+        return [
+            { name: "separator", begin: beginOffset + headData[0].length + 1 + headData[1].length, end: beginOffset + headData[0].length + 1 + headData[1].length + 1, result: " ", type: CompletionType.DUMMY_TYPE, brief: "Add separator between path and HTTP version", doc: "" }
+        ]
+    }
+    else if (offset < beginOffset + headData[0].length + 1 + headData[1].length + 1 + 8) {
+        return [
+            { name: "HTTP/1.1", begin: beginOffset + headData[0].length + 1 + headData[1].length + 1, end: beginOffset + headData[0].length + 1 + headData[1].length + 1 + 8, result: "HTTP/1.1", type: CompletionType.DUMMY_TYPE, brief: "HTTP/1.1", doc: "" }
+        ]
+    }
+    else {
+        return []
+    }
+
+    return []
+}
 const addOffset = (subtreeBegin: number) => (completion: Completion): Completion => {
     const {name, result, type, brief, doc, begin, end} = completion
     return {
@@ -149,8 +250,8 @@ export async function requestCompletions(text: string, offset: number, ctx: OasC
     }
 
     if (httpOffset !== null) {
-        // const comps = await requestHttpCompletions(trees.http, httpOffset, {method: method ?? "GET", path: path ?? "/", headers})
-        // return comps
+        const comps = await requestHttpCompletions(trees.http, trees.httpText, httpOffset, {method: method ?? "GET", path: path ?? "/", headers}, ctx)
+        return comps
     }
 
     return [

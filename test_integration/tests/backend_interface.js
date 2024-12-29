@@ -1,4 +1,4 @@
-import { describe, test, before } from "node:test";
+import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 
 import * as be from "@local/oas-ls-backend";
@@ -12,7 +12,9 @@ describe(`backend`, () => {
             assert.deepStrictEqual(be.CompletionType, {
                 DUMMY_TYPE: "dummyType",
                 OBJECT_KEY: "object_key",
-                VALUE: "value"
+                VALUE: "value",
+                PATH: "path",
+                METHOD: "method",
             })
         })
         test("HintType", () => {
