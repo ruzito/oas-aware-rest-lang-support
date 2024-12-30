@@ -6,7 +6,7 @@
 
 HttpPart {
   Method " " Path " " Version "\n"
-  Headers "\n"
+  Headers
 }
 
 Method { method }
@@ -31,7 +31,7 @@ Body { line? ("\n"+ line)* }
     separator { '---' '-'* }
     noSpaceLine { ![ \n]+ }
     line { ![\n]+ }
-    keyVal { ![:\n]+ }
+    keyVal { ![-:\n] ![:\n]* }
 }
 
 @external propSource httpHighlighting from "./highlight"
