@@ -8,15 +8,12 @@
     "url": "https://github.com/npm/cli.git"
   },
   "scripts": {
-    "test": "node --test ./tests/*.js ; node --test ./build/tests/bundle/test_*_bundle.js",
-    "asbuild:debug": "asc assembly/index.ts --target debug",
-    "asbuild:release": "asc assembly/index.ts --target release",
+    "test": "node --test ./tests/*.js && node --test ./build/tests/bundle/test_*_bundle.js",
     "build-tsc": "tsc -p typescript",
     "build-grammar": "grammars/build.sh",
-    "build-asm": "npm run asbuild:debug && npm run asbuild:release",
     "bundle": "grammars/copy.sh && node bundle.mjs",
-    "build": "npm run build-asm && npm run build-grammar && npm run build-tsc && npm run bundle",
-    "build-skip-grammar": "npm run build-asm && npm run build-tsc && npm run bundle"
+    "build": "npm run build-grammar && npm run build-tsc && npm run bundle",
+    "build-skip-grammar": "npm run build-tsc && npm run bundle"
   },
   "keywords": [],
   "license": "MIT",

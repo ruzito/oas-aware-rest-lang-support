@@ -13,11 +13,7 @@ case "$component" in
     ;;
 
   backend-skip-grammar)
-    (cd backend && npm run build-asm && npm run build-asm && npm run bundle)
-    ;;
-
-  backend-asm)
-    (cd backend && npm run build-asm && npm run bundle)
+    (cd backend && npm run build-skip-grammar)
     ;;
 
   backend-tsc)
