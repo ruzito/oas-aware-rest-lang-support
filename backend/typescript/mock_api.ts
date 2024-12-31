@@ -1,11 +1,10 @@
-import * as wasm from "../build/asm.js"
 import { CompletionType, HintType, Markdown, Completion, Hint, OasContext } from "./types.js"
 
 export async function requestDocs(text: string, offset: number, ctx: OasContext): Promise<Markdown> {
     return ""
     let doc_md = `
 # Doc markdown
-<h1>${wasm.add(3, 5)}</h1>
+<h1>Heading</h1>
 what is this
 `.trim()
     return doc_md

@@ -1,7 +1,6 @@
 *
 !build/
 !build/*.d.ts
-!build/asm.wasm
 !build/tree-sitter-*.wasm
 !build/bundle.js
 !build/bundle_node.js
