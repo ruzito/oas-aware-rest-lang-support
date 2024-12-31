@@ -65,15 +65,19 @@ async function requestTooltip(ctx: be.OasContext, text: string, offset: number):
 function mapCompletionType(t: be.CompletionType): string {
   switch (t) {
     case be.CompletionType.DUMMY_TYPE:
-      console.warn(`Dummy completion type, fallback to "namespace"`)
-      return "namespace"
+      console.warn(`Dummy completion type, fallback to "text"`)
+      return "text"
     case be.CompletionType.OBJECT_KEY:
       return "property"
     case be.CompletionType.VALUE:
       return "type"
+    case be.CompletionType.METHOD:
+      return "function"
+    case be.CompletionType.PATH:
+      return "namespace"
     default:
       console.warn(`Unknown completion type "${t}", fallback to "function"`)
-      return "function"
+      return "enum"
   }
 }
 
