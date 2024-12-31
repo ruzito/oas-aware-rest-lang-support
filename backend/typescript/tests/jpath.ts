@@ -28,7 +28,11 @@ async function getJPath(s: string, cursor = '|') {
     const parseResult = await rp.parse(httpPayload + text)
     if (parseResult === null) {
         fail(`Could not parse tested input \`${text}\``)
-        return {path: null, tail: null} // unreachable just, wtf is typescript doing here, fail throws every single time, come on!!!
+        return {path: null, tail: null}
+        // return here is unreachable,
+        // just wtf is typescript doing here,
+        // fail throws every single time, come on!!!
+        // It even says so in the return type being `never`
     }
     const {http, json, jsonBegin} = parseResult
     assertEq(jsonBegin, httpPayload.length)

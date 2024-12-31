@@ -113,7 +113,7 @@ async function requestJsonCompletions(tree: Tree, offset: number, httpData: Http
     // ]
 }
 
-async function requestHttpCompletions(tree: Tree, httpText: string, offset: number, httpData: HttpData, ctx: OasContext): Promise<Completion[]> {
+async function requestHttpCompletions(tree: Tree, httpText: string, offset: number, ctx: OasContext): Promise<Completion[]> {
     const trimmedHttp = httpText.trimStart()
     const beginOffset = httpText.length - trimmedHttp.length
     let head = ""
@@ -131,7 +131,6 @@ async function requestHttpCompletions(tree: Tree, httpText: string, offset: numb
     if (headData.length !== 3) {
         return []
     }
-    let method = headData[0].toLowerCase()
     let path = headData[1]
 
     const oas = ctx.root;
@@ -236,7 +235,13 @@ export async function requestCompletions(text: string, offset: number, ctx: OasC
             { name: "separator", begin: offset, end: newline, result, type: CompletionType.DUMMY_TYPE, brief: "Add separator between HTTP and JSON body", doc: SEPARATOR_EXPLANATION }
         ]
     }
-
+    const ready = ctx.root !== null
+    if (!ready) {
+        return [
+            { name: "OAS NOT LOADED", begin: offset, end: offset, result: "", type: CompletionType.VALUE, brief: "Load the OpenAPI specificationn first", doc: "" }
+        ]
+    }
+    
     const httpOffset = (offset >= trees.jsonBegin) ? null : offset
     const jsonOffset = (offset >= trees.jsonBegin) ? offset - trees.jsonBegin : null
     const {method, path, headers} = parseHttpData(trees.http)
@@ -250,7 +255,7 @@ export async function requestCompletions(text: string, offset: number, ctx: OasC
     }
 
     if (httpOffset !== null) {
-        const comps = await requestHttpCompletions(trees.http, trees.httpText, httpOffset, {method: method ?? "GET", path: path ?? "/", headers}, ctx)
+        const comps = await requestHttpCompletions(trees.http, trees.httpText, httpOffset, ctx)
         return comps
     }
 
