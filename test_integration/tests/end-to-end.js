@@ -24,7 +24,7 @@ global.console.log = function (...args) {
 // const originalConsoleWarn = console.warn;
 global.console.warn = function (...args) {
   logFile.write(util.format(Date.now(), "[WARN]", ...args) + "\n");
-  // originalConsoleLog(...args)
+  // originalConsoleWarn(...args)
 };
 
 const port = 5555;

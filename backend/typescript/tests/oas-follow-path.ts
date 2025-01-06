@@ -7,7 +7,7 @@ import {
   loadOas,
   oasFollowPath,
   getObjectKeys,
-  OASFormat
+  OasFormat
 } from "../oas-wrapper.js";
 
 const logFile = fs.createWriteStream('console-output.oas-follow-path.log', { flags: 'w' });
@@ -214,7 +214,7 @@ function followTest(specObj: {[key: string]: string}, method: string, url: strin
         console.log("\n\n=== Running test: ", testName);
         const ctx = initOasContext();
         console.log("=== Load OAS");
-        await loadOas(spec, OASFormat.YAML, ctx);
+        await loadOas(spec, OasFormat.YAML, ctx);
         console.log("=== Follow Path");
         const result = oasFollowPath(
           jpath,

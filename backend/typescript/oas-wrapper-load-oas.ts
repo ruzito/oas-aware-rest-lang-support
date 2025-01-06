@@ -3,7 +3,7 @@ import { parse as parseYAML } from "yaml";
 import * as util from "./utils.js";
 import { OasContext, OasSpec, JPathBody, HttpData } from "./types.js";
 
-export enum OASFormat {
+export enum OasFormat {
   YAML = "YAML",
   JSON = "JSON",
 }
@@ -15,11 +15,11 @@ export function initOasContext(): OasContext {
   };
 }
 
-async function parseOAS(spec: string, format: OASFormat): Promise<OasSpec> {
+async function parseOAS(spec: string, format: OasFormat): Promise<OasSpec> {
   // console.log("Parsing OAS", { spec, format });
   let pojo: util.PlainObject = {};
   let tryList = [(x: string) => JSON.parse(x), (x: string) => parseYAML(x)];
-  if (format === OASFormat.YAML) {
+  if (format === OasFormat.YAML) {
     tryList = [parseYAML, JSON.parse];
   }
   let success = false;
@@ -68,12 +68,12 @@ async function fetchOAS(url: string, ctx: OasContext): Promise<OasSpec | null> {
   // console.log("Fetched OAS from", url, {response});
 
   // Guess format
-  let format = OASFormat.JSON;
+  let format = OasFormat.JSON;
   if (
     typeof contentType === "string" &&
     (contentType.includes("yml") || contentType.includes("yaml"))
   ) {
-    format = OASFormat.YAML;
+    format = OasFormat.YAML;
   }
 
   // parse to json
@@ -104,7 +104,7 @@ async function dereferenceURLs(pojoOAS: OasSpec, ctx: OasContext) {
 
 export async function loadOas(
   oas: string,
-  format: OASFormat = OASFormat.JSON,
+  format: OasFormat = OasFormat.JSON,
   ctx: OasContext
 ): Promise<void> {
   const pojo = await parseOAS(oas, format);

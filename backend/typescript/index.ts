@@ -15,5 +15,7 @@ export const requestCompletions = completions.requestCompletions
 
 export const requestHints = hints.requestHints
 
+export const OasFormat = specLoader.OasFormat
+
 export { CompletionType, HintType }
 export type { Markdown, Completion, Hint, OasContext }

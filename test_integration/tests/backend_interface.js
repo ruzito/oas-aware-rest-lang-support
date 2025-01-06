@@ -5,7 +5,7 @@ import * as be from "@local/oas-ls-backend";
 
 describe(`backend`, () => {
     test("exports only needed", () => {
-        assert.deepStrictEqual(Object.keys(be).sort(), ['CompletionType', 'HintType', 'fetchOas', 'parseOas', 'requestCompletions', 'requestDocs', 'requestHints', 'initOasContext'].sort())
+        assert.deepStrictEqual(Object.keys(be).sort(), ['CompletionType', 'HintType', 'OasFormat', 'fetchOas', 'parseOas', 'requestCompletions', 'requestDocs', 'requestHints', 'initOasContext'].sort())
     })
     describe("exports enum", () => {
         test("CompletionType", () => {
