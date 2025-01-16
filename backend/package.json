@@ -1,11 +1,19 @@
 {
   "name": "@ruzito/oas-ls-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "This is a library providing language support features for REST requests based on OpenAPI 3.0 specifications.",
   "author": "ruzito",
   "repository": {
     "type": "git",
-    "url": "https://github.com/npm/cli.git"
+    "url": "https://github.com/ruzito/oas-aware-rest-lang-support"
+  },
+  "main": "./build/index.js",
+  "exports": {
+    ".": {
+      "browser": "./build/bundle.js",
+      "types": "./build/index.d.ts",
+      "node": "./build/bundle_node.js"
+    }
   },
   "scripts": {
     "test": "node --test ./tests/*.js && node --test ./build/tests/bundle/test_*_bundle.js",
@@ -32,14 +40,5 @@
     "openapi-types": "^12.1.3",
     "web-tree-sitter": "^0.24.3",
     "yaml": "^2.6.0"
-  },
-  "type": "module",
-  "main": "./build/index.js",
-  "exports": {
-    ".": {
-      "browser": "./build/bundle.js",
-      "types": "./build/index.d.ts",
-      "node": "./build/bundle_node.js"
-    }
   }
 }

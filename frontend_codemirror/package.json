@@ -1,8 +1,21 @@
 {
   "name": "@ruzito/oas-ls-codemirror",
   "version": "1.0.0",
-  "description": "",
+  "description": "This is a plugin for CodeMirror providing language support for REST requests based on OpenAPI 3.0 specifications.",
+  "author": "ruzito",
+  "keywords": [],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruzito/oas-aware-rest-lang-support"
+  },
   "main": "./build/main.js",
+  "exports": {
+    ".": {
+      "import": "./build/main.js",
+      "types": "./build/main.d.ts"
+    }
+  },
   "scripts": {
     "test": "node --test ./build/tests/*.js",
     "build-grammar": "lezer-generator src/http.grammar -o src/http_parser.ts",
@@ -26,14 +39,5 @@
   "devDependencies": {
     "@types/markdown-it": "^14.1.2",
     "typescript": "^5.5.4"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "exports": {
-    ".": {
-      "import": "./build/main.js",
-      "types": "./build/main.d.ts"
-    }
   }
 }
