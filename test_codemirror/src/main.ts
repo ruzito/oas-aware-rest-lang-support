@@ -1,7 +1,7 @@
 import { EditorView, basicSetup } from 'codemirror'
 import {EditorState} from "@codemirror/state"
 import {EditorViewConfig, keymap} from "@codemirror/view"
-import * as oasFrontend from '@local/oas-ls-codemirror';
+import * as oasFrontend from '@ruzito/oas-ls-codemirror';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import {tags} from "@lezer/highlight"
 import {indentWithTab} from "@codemirror/commands"

@@ -12,7 +12,7 @@ import { parseMixed } from '@lezer/common';
 import { tags } from "@lezer/highlight"
 import { linter, Diagnostic, LintSource } from "@codemirror/lint"
 
-import * as be from '@local/oas-ls-backend';
+import * as be from '@ruzito/oas-ls-backend';
 
 import MarkdownIt from 'markdown-it';
 import { Extension } from '@codemirror/state';

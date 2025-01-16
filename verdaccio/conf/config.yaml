@@ -47,7 +47,7 @@ web:
 # https://verdaccio.org/docs/protect-your-dependencies/
 # https://verdaccio.org/docs/configuration#packages
 packages:
-  '@local/*':
+  '@ruzito/*':
     # scoped packages
     access: $anonymous
     publish: $anonymous

@@ -13,6 +13,6 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@local/oas-ls-backend": "1.0.0"
+    "@ruzito/oas-ls-backend": "1.0.0"
   }
 }

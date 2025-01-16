@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 
-import * as be from "@local/oas-ls-backend";
+import * as be from "@ruzito/oas-ls-backend";
 
 describe(`backend`, () => {
     test("exports only needed", () => {

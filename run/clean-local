@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-rm -rf */node_modules/@local/
+rm -rf */node_modules/@ruzito/
 rm -rf */node_modules/.vite/
 
 
