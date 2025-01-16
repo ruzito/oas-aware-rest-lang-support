@@ -9,7 +9,7 @@ function info() {
 
 function publish() {
     echo "Publishing $(info $1)"
-    cd $1 && npm publish --@ruzito:registry=https://registry.npmjs.org/
+    (cd $1 && npm publish --access=public --@ruzito:registry=https://registry.npmjs.org/)
 }
 
 run/fresh
