@@ -1,9 +1,19 @@
 #!/bin/bash
 set -euxo pipefail
 
+# This script is used to build the whole project from scratch
+# `run/fresh` uses `npm ci`
+# `run/fresh install` uses `npm install`
+# `run/fresh reinstall` deletes lockfiles and then uses `npm install`
+
+# `run/fresh offline` uses `npm ci` and skips rebuilding of treesitter grammars
+#  you can then hope that your machine has cached docker containers
+#  I needed this because I was on a train and couldn't download half a gig
+#  for every build 
+
 icmd=${1:-ci}
 
-run/clean "$icmd"
+run/.impl/clean "$icmd"
 
 run/.impl/start-local-npm
 
@@ -13,7 +23,7 @@ instFlags="--loglevel silent"
 
 if [[ "$icmd" = "reinstall" ]]
 then
-    run/unlock
+    run/.impl/unlock
     icmd="install"
 fi
 
@@ -40,4 +50,4 @@ run/.impl/remove-local-integrity-hash
 
 # run/.impl/stop-local-npm
 
-run/notify
+run/.impl/notify

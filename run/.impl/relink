@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-run/clean-local
+run/.impl/clean-local
 
 run/.impl/start-local-npm
 

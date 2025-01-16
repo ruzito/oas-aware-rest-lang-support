@@ -1,5 +1,0 @@
-#!/bin/bash
-set -euxo pipefail
-
-cd backend
-npm run test

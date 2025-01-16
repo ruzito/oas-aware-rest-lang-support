@@ -1,6 +1,10 @@
 #!/bin/bash
 set -euxo pipefail
 
+# This script is used to rebuild only a part of the project,
+# this is a fluid, dev-only script,
+# feel free to modify it to your needs
+
 for component in "$@"
 do
 case "$component" in
@@ -37,7 +41,7 @@ case "$component" in
     ;;
 
   stop)
-    run/notify
+    run/.impl/notify
     exit 0
     ;;
 
@@ -48,5 +52,5 @@ case "$component" in
 esac
 done
 
-run/relink
-run/notify
+run/.impl/relink
+run/.impl/notify

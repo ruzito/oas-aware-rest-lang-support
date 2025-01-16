@@ -1,15 +1,16 @@
 #!/bin/bash
 set -euo pipefail
 
-# Command in dir1
+# This script is used to start example web projects on localhost
+
 (
     cd test_codemirror || exit
     npm run dev > vite.log 2> vite.err.log
 ) &
 
-# # Command in dir2
+# # Second project
 # (
-#     cd monaco_test || exit
+#     cd test_codemirror || exit
 #     npm run dev > vite.log 2> vite.err.log
 # ) &
 
@@ -17,8 +18,5 @@ sleep 2
 
 echo 'Codemirror:'
 grep 'http://' test_codemirror/vite.log
-
-# echo 'Monaco:'
-# grep 'http://' monaco_test/vite.log
 
 wait

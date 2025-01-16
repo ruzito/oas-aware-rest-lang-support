@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+# This script is used to publish the public packages to npm
+
 function info() {
     echo "$1: $(cd $1 && npm pkg get name) $(cd $1 && npm pkg get version)"
 }
